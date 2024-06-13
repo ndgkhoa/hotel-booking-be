@@ -3,6 +3,7 @@ import User from '../models/user'
 import { generateToken, setAuthTokenCookie } from '../utils/tokenUtils'
 import { comparePasswords, hashPassword } from '../utils/bcryptUtils'
 import { validationResult } from 'express-validator'
+import _ from 'lodash'
 
 const AuthController = {
     registerUser: async (req: Request, res: Response) => {
@@ -35,11 +36,15 @@ const AuthController = {
 
             return res
                 .status(200)
-                .send({ message: 'Accout created successfully' })
+                .send({ message: 'Account created successfully' })
         } catch (error) {
             console.log(error)
             res.status(500).send({ message: 'Something went wrong' })
         }
+    },
+
+    verifyToken: async (req: Request, res: Response) => {
+        res.status(200).send({ userId: req.userId })
     },
 
     loginUser: async (req: Request, res: Response) => {
@@ -64,6 +69,30 @@ const AuthController = {
             console.log(error)
             res.status(500).send({ message: 'Something went wrong' })
         }
+    },
+
+    getAllUser: async (req: Request, res: Response) => {
+        try {
+            const users = await User.find().lean()
+            const userData = users.map((user) =>
+                _.omit(user, ['password', '__v']),
+            )
+
+            res.status(200).send({
+                message: 'Get all users successfully',
+                users: userData,
+            })
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ message: 'Failed to get all user' })
+        }
+    },
+
+    logout: async (req: Request, res: Response) => {
+        res.cookie('auth_token', '', {
+            expires: new Date(0),
+        })
+        res.send()
     },
 }
 module.exports = AuthController
