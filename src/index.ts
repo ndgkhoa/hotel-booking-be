@@ -4,6 +4,7 @@ import 'dotenv/config'
 import connectDB from './config/db'
 import authRoutes from './routes/auth'
 import cookieParser from 'cookie-parser'
+import path from 'path'
 
 connectDB()
 
@@ -17,6 +18,8 @@ app.use(
         credentials: true,
     }),
 )
+
+app.use(express.static(path.join(__dirname, '../../fontend/dist')))
 
 app.use('/api/auth', authRoutes)
 
