@@ -15,5 +15,12 @@ router.post(
 )
 
 router.get('/', verifyToken, HotelsController.getAllHotels)
+router.get('/:id', verifyToken, HotelsController.getHotel)
+router.put(
+    '/:hotelId',
+    verifyToken,
+    upload.array('imageFiles'),
+    HotelsController.updateHotel,
+)
 
 export default router
