@@ -14,6 +14,7 @@ router.post(
     HotelsController.createHotel,
 )
 
+router.get('/search', HotelsController.search)
 router.get('/', verifyToken, HotelsController.getAllHotels)
 router.get('/:id', verifyToken, HotelsController.getHotel)
 router.put(
