@@ -3,6 +3,7 @@ import upload from '../config/multerConfig'
 import HotelsController from '../controllers/HotelsController'
 import verifyToken from '../middlewares/auth'
 import hotelValidation from '../middlewares/hotelValidation'
+import { param } from 'express-validator'
 
 const router = express.Router()
 
@@ -16,7 +17,11 @@ router.post(
 
 router.get('/search', HotelsController.search)
 router.get('/', verifyToken, HotelsController.getAllHotels)
-router.get('/:id', verifyToken, HotelsController.getHotel)
+router.get(
+    '/:id',
+    [param('id').notEmpty().withMessage('Hotel Id is required')],
+    HotelsController.getHotel,
+)
 router.put(
     '/:hotelId',
     verifyToken,

@@ -3,6 +3,7 @@ import cloudinary from 'cloudinary'
 import { HotelSearchResponse, HotelType } from '../shared/types'
 import Hotel from '../models/hotel'
 import { constructSearchQuery } from '../utils/searchQueryUtils'
+import { validationResult } from 'express-validator'
 
 const HotelsController = {
     createHotel: async (req: Request, res: Response) => {
@@ -25,12 +26,17 @@ const HotelsController = {
     },
 
     getHotel: async (req: Request, res: Response) => {
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() })
+        }
         const id = req.params.id.toString()
         try {
-            const hotel = await Hotel.findOne({ _id: id, userId: req.userId })
+            const hotel = await Hotel.findById(id)
             res.json(hotel)
         } catch (error) {
-            res.status(500).json({ message: 'Error fetching hotels' })
+            console.log(error)
+            res.status(500).json({ message: 'Error fetching hotel' })
         }
     },
 
