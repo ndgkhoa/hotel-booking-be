@@ -2,8 +2,11 @@ import express, { Request, Response } from 'express'
 import verifyToken from '../middlewares/auth'
 import Hotel from '../models/hotel'
 import { HotelType } from '../shared/types'
+import BookingsController from '../controllers/BookingsController'
 
 const router = express.Router()
+
+router.post('/:hotelId', verifyToken, BookingsController.booking)
 
 // router.get('/', verifyToken, async (req: Request, res: Response) => {
 //     try {

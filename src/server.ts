@@ -7,6 +7,7 @@ import usersRoutes from './routes/users'
 import accountRoutes from './routes/accounts'
 import CategoriesRoutes from './routes/categories'
 import hotelsRoutes from './routes/hotels'
+import receiptsRoutes from './routes/receipts'
 import bookingsRoutes from './routes/bookings'
 import cookieParser from 'cookie-parser'
 import cloudinaryConfig from './config/cloudinaryConfig'
@@ -31,6 +32,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/hotels', hotelsRoutes)
 app.use('/api/users', usersRoutes)
 app.use('/api/accounts', accountRoutes)
+app.use('/api/receipts', receiptsRoutes)
 app.use('/api/categories', CategoriesRoutes)
 app.use('/api/bookings', bookingsRoutes)
 // app.get('*', (req: Request, res: Response) => {

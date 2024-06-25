@@ -48,6 +48,15 @@ export type HotelSearchResponse = {
     }
 }
 
+export type ReceiptType = {
+    _id: string
+    paymentId: string
+    paymentMethod: string
+    date: Date
+    total: number
+    userId: string
+}
+
 export type PaymentIntentResponse = {
     paymentIntentId: string
     clientSecret: string
@@ -56,13 +65,20 @@ export type PaymentIntentResponse = {
 
 export type BookingType = {
     _id: string
-    userId: string
-    firstName: string
-    lastName: string
-    email: string
-    adultCount: number
-    childCount: number
     checkIn: Date
     checkOut: Date
+    status: string
     totalCost: number
+    userId: string
+    hotelId: string
+}
+
+export type BookingDetailType = {
+    _id: string
+    totalCost: number
+    adultCount: number
+    childCount: number
+    hotelId: string
+    receiptId: string
+    bookingId: string
 }

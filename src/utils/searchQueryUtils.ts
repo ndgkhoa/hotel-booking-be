@@ -28,11 +28,11 @@ export const constructSearchQuery = (queryParams: any) => {
         }
     }
 
-    if (queryParams.types) {
-        constructedQuery.type = {
-            $in: Array.isArray(queryParams.types)
-                ? queryParams.types
-                : [queryParams.types],
+    if (queryParams.categories) {
+        constructedQuery.categories = {
+            $in: Array.isArray(queryParams.categories)
+                ? queryParams.categories
+                : [queryParams.categories],
         }
     }
 

@@ -35,11 +35,5 @@ router.put(
     upload.array('imageFiles'),
     HotelsController.updateHotel,
 )
-router.post(
-    '/:hotelId/bookings/payment-intent',
-    verifyToken,
-    HotelsController.payment,
-)
-router.post('/:hotelId/bookings', verifyToken, HotelsController.booking)
 
 export default router

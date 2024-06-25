@@ -68,6 +68,7 @@ const AuthController = {
             res.status(200).send({
                 userId: account.id,
                 role: account.role,
+                token: token,
             })
         } catch (error) {
             res.status(500).send({ message: 'Something went wrong' })
