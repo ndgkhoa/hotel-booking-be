@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import Hotel from '../models/hotel'
 import User from '../models/user'
+import _ from 'lodash'
 
 const UsersController = {
     getUser: async (req: Request, res: Response) => {
@@ -14,6 +15,23 @@ const UsersController = {
         } catch (error) {
             console.log(error)
             res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    getAllUser: async (req: Request, res: Response) => {
+        try {
+            const users = await User.find().lean()
+            const userData = users.map((user) =>
+                _.omit(user, ['password', '__v']),
+            )
+
+            res.status(200).send({
+                message: 'Get all users successfully',
+                data: userData,
+            })
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ message: 'Failed to get all user' })
         }
     },
 

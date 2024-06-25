@@ -18,12 +18,12 @@ const HotelsController = {
             newHotel.imageUrls = imageUrls
             newHotel.lastUpdate = new Date()
             newHotel.userId = req.userId
+            newHotel.status = 'Vacant'
 
             const hotel = new Hotel(newHotel)
             await hotel.save()
-            res.status(201).send(hotel)
+            res.status(201).json({ message: 'Hotel created successfully' })
         } catch (error) {
-            console.log('error creating hotel: ', error)
             res.status(500).json({ message: 'Something went wrong' })
         }
     },

@@ -19,7 +19,8 @@ const hotelSchema = new mongoose.Schema<HotelType>({
     city: { type: String, require: true },
     country: { type: String, require: true },
     description: { type: String, require: true },
-    type: { type: String, require: true },
+    status: { type: String, require: true },
+    categories: { type: String, require: true },
     adultCount: { type: Number, require: true },
     childCount: { type: Number, require: true },
     facilities: [{ type: String, require: true }],
@@ -27,7 +28,6 @@ const hotelSchema = new mongoose.Schema<HotelType>({
     starRating: { type: Number, require: true, min: 1, max: 5 },
     imageUrls: [{ type: String, require: true }],
     lastUpdate: { type: Date, require: true },
-    bookings: [bookingsSchema],
 })
 
 const Hotel = mongoose.model<HotelType>('Hotel', hotelSchema)

@@ -1,9 +1,24 @@
-export type UserType = {
+export type AccountType = {
     _id: string
     email: string
     password: string
+    role: string
+}
+
+export type UserType = {
+    _id: string
+    role: string
+    birthday: string
+    address: string
+    phone: string
+    email: string
     firstName: string
     lastName: string
+}
+
+export type CategoryType = {
+    _id: string
+    name: string
 }
 
 export type HotelType = {
@@ -13,7 +28,8 @@ export type HotelType = {
     city: string
     country: string
     description: string
-    type: string
+    status: string
+    categories: string
     adultCount: number
     childCount: number
     facilities: string[]
@@ -21,7 +37,6 @@ export type HotelType = {
     starRating: number
     imageUrls: string[]
     lastUpdate: Date
-    bookings: BookingType[]
 }
 
 export type HotelSearchResponse = {
