@@ -35,5 +35,6 @@ router.put(
     upload.array('imageFiles'),
     HotelsController.updateHotel,
 )
+router.delete('/:hotelId', verifyToken, HotelsController.deleteHotel)
 
 export default router

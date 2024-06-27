@@ -37,6 +37,20 @@ const CategoriesController = {
             res.status(500).send({ message: 'Something went wrong' })
         }
     },
+
+    deleteCategory: async (req: Request, res: Response) => {
+        try {
+            const categoryId = req.params.categoryId
+            const category = await Category.findById(categoryId)
+            if (!category) {
+                return res.status(404).json({ message: 'Category not found' })
+            }
+            await Category.findByIdAndDelete(categoryId)
+            res.status(200).json({ message: 'Category deleted successfully' })
+        } catch (error) {
+            res.status(500).send({ message: 'Something went wrong' })
+        }
+    },
 }
 
 export default CategoriesController

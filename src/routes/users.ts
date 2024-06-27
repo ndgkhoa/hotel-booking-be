@@ -4,7 +4,7 @@ import UsersController from '../controllers/UsersController'
 
 const router = express.Router()
 
-router.get('/', verifyToken, UsersController.getAllUser)
+router.get('/', UsersController.getAllUser)
 router.get('/me', verifyToken, UsersController.getUser)
 router.get('/:id', verifyToken, UsersController.getHotelFromUser)
 

@@ -63,10 +63,10 @@ const AuthController = {
             if (!isMatch) {
                 return res.status(400).json({ message: 'Password dont match' })
             }
-            const token = generateToken(account.id, account.role)
+            const token = generateToken(account.userId, account.role)
             setAuthTokenCookie(res, token)
             res.status(200).send({
-                userId: account.id,
+                userId: account.userId,
                 role: account.role,
                 token: token,
             })

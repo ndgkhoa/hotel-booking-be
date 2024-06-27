@@ -4,6 +4,6 @@ import ReceiptsController from '../controllers/ReceiptsController'
 
 const router = express.Router()
 
-router.post('/:hotelId', verifyToken, ReceiptsController.createReceipt)
+router.post('/:hotelId/payment', verifyToken, ReceiptsController.createReceipt)
 
 export default router

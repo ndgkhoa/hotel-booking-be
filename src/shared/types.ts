@@ -1,5 +1,6 @@
 export type AccountType = {
     _id: string
+    userId: string
     email: string
     password: string
     role: string
@@ -51,16 +52,9 @@ export type HotelSearchResponse = {
 export type ReceiptType = {
     _id: string
     paymentId: string
-    paymentMethod: string
     date: Date
     total: number
     userId: string
-}
-
-export type PaymentIntentResponse = {
-    paymentIntentId: string
-    clientSecret: string
-    totalCost: number
 }
 
 export type BookingType = {

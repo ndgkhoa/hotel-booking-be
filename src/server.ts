@@ -9,6 +9,7 @@ import CategoriesRoutes from './routes/categories'
 import hotelsRoutes from './routes/hotels'
 import receiptsRoutes from './routes/receipts'
 import bookingsRoutes from './routes/bookings'
+import bookingDetailsRoutes from './routes/bookingDetails'
 import cookieParser from 'cookie-parser'
 import cloudinaryConfig from './config/cloudinaryConfig'
 
@@ -26,8 +27,6 @@ app.use(
     }),
 )
 
-// app.use(express.static(path.join(__dirname, '../../frontend/dist')))
-
 app.use('/api/auth', authRoutes)
 app.use('/api/hotels', hotelsRoutes)
 app.use('/api/users', usersRoutes)
@@ -35,9 +34,7 @@ app.use('/api/accounts', accountRoutes)
 app.use('/api/receipts', receiptsRoutes)
 app.use('/api/categories', CategoriesRoutes)
 app.use('/api/bookings', bookingsRoutes)
-// app.get('*', (req: Request, res: Response) => {
-//     res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'))
-// })
+app.use('/api/bookingDetails', bookingDetailsRoutes)
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`)

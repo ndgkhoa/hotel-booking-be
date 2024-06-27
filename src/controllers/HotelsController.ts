@@ -18,7 +18,7 @@ const HotelsController = {
             newHotel.imageUrls = imageUrls
             newHotel.lastUpdate = new Date()
             newHotel.userId = req.userId
-            newHotel.status = 'Vacant'
+            newHotel.status = 'Available'
 
             const hotel = new Hotel(newHotel)
             await hotel.save()
@@ -49,6 +49,20 @@ const HotelsController = {
             res.json(hotels)
         } catch (error) {
             res.send(500).json({ message: 'Error fetching hotel' })
+        }
+    },
+
+    deleteHotel: async (req: Request, res: Response) => {
+        try {
+            const hotelId = req.params.hotelId
+            const hotel = await Hotel.findById(hotelId)
+            if (!hotel) {
+                return res.status(404).json({ message: 'Hotel not found' })
+            }
+            await Hotel.findByIdAndDelete(hotelId)
+            res.status(200).json({ message: 'Hotel deleted successfully' })
+        } catch (error) {
+            res.status(500).send({ message: 'Something went wrong' })
         }
     },
 
