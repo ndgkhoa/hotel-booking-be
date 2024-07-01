@@ -47,6 +47,8 @@ const UsersController = {
             res.status(500).json({ message: 'Error fetching hotels' })
         }
     },
+
+    
 }
 
 export default UsersController

@@ -51,6 +51,30 @@ const CategoriesController = {
             res.status(500).send({ message: 'Something went wrong' })
         }
     },
+
+    updateCategory: async (req: Request, res: Response) => {
+        try {
+            const updateData = req.body
+
+            const updatedCategory = await Category.findByIdAndUpdate(
+                { _id: req.params.categoryId },
+                updateData,
+                { new: true },
+            )
+
+            if (!updatedCategory) {
+                return res.status(404).json({ message: 'Category not found' })
+            }
+
+            return res.status(200).json({
+                message: 'Category updated successfully',
+                category: updatedCategory,
+            })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
 }
 
 export default CategoriesController
