@@ -2,10 +2,11 @@ import mongoose from 'mongoose'
 import { ReceiptType } from '../shared/types'
 
 const ReceiptSchema = new mongoose.Schema<ReceiptType>({
-    paymentId: { type: String, required: true },
-    date: { type: Date, require: true },
-    total: { type: Number, require: true },
-    userId: { type: String, require: true },
+    date: { type: Date, required: true },
+    total: { type: Number, required: true },
+    userId: { type: String, required: true },
+    method: { type: String, required: true },
+    coupon: { type: String, required: true },
 })
 
 const Receipt = mongoose.model<ReceiptType>('Receipt', ReceiptSchema)

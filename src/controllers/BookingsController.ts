@@ -1,9 +1,6 @@
 import { Request, Response } from 'express'
-import Stripe from 'stripe'
 import Booking from '../models/booking'
 import Hotel from '../models/hotel'
-
-const stripe = new Stripe(process.env.STRIPE_API_KEY as string)
 
 const BookingsController = {
     booking: async (req: Request, res: Response) => {
@@ -11,32 +8,25 @@ const BookingsController = {
         const hotelId = req.params.hotelId
         const userId = req.userId
 
+        if (!checkIn || !checkOut || !numberOfNights) {
+            return res.status(400).json({ message: 'Missing required fields' })
+        }
+
         try {
             const hotel = await Hotel.findById(hotelId)
             if (!hotel) {
                 return res.status(400).json({ message: 'Hotel not found' })
             }
 
-            const totalCost = hotel.pricePerNight * numberOfNights
-            const paymentIntent = await stripe.paymentIntents.create({
-                amount: totalCost * 100,
-                currency: 'gbp',
-                metadata: {
-                    hotelId,
-                    userId: req.userId,
-                },
-            })
-
-            if (!paymentIntent.client_secret) {
-                return res
-                    .status(500)
-                    .json({ message: 'Error creating payment intent' })
-            }
+            const totalCost = parseFloat(
+                (hotel.pricePerNight * numberOfNights).toFixed(2),
+            )
 
             const newBooking = new Booking({
                 checkIn,
                 checkOut,
-                status: 'Pending ',
+                date: new Date(),
+                status: 'Pending',
                 totalCost,
                 userId,
                 hotelId,
@@ -44,13 +34,45 @@ const BookingsController = {
 
             await newBooking.save()
 
-            const response = {
-                paymentIntentId: paymentIntent.id,
-                clientSecret: paymentIntent.client_secret.toString(),
-                totalCost,
-            }
-            res.send(response)
+            res.status(201).send(newBooking)
         } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    bookingWithoutLogin: async (req: Request, res: Response) => {
+        const { checkIn, checkOut, numberOfNights, email, phone } = req.body
+        const hotelId = req.params.hotelId
+        if (!checkIn || !checkOut || !numberOfNights) {
+            return res.status(400).json({ message: 'Missing required fields' })
+        }
+        try {
+            const hotel = await Hotel.findById(hotelId)
+            if (!hotel) {
+                return res.status(400).json({ message: 'Hotel not found' })
+            }
+
+            const totalCost = parseFloat(
+                (hotel.pricePerNight * numberOfNights).toFixed(2),
+            )
+
+            const newBooking = new Booking({
+                checkIn,
+                checkOut,
+                date: new Date(),
+                status: 'Pending',
+                totalCost,
+                hotelId,
+                email,
+                phone,
+            })
+
+            await newBooking.save()
+
+            res.status(201).send(newBooking)
+        } catch (error) {
+            console.error(error)
             res.status(500).json({ message: 'Something went wrong' })
         }
     },

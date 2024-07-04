@@ -4,7 +4,8 @@ import BookingDetailsController from '../controllers/BookingDetailsController'
 
 const router = express.Router()
 
-router.get('/', verifyToken, BookingDetailsController.getAllDetails)
+router.get('/', BookingDetailsController.getAllDetails)
 router.post('/', verifyToken, BookingDetailsController.createDetail)
+router.get('/:hotelId', BookingDetailsController.getTotalCostByHotelId)
 
 export default router

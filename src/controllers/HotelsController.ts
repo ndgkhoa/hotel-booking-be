@@ -4,13 +4,18 @@ import { BookingType, HotelSearchResponse, HotelType } from '../shared/types'
 import Hotel from '../models/hotel'
 import { constructSearchQuery } from '../utils/searchQueryUtils'
 import { validationResult } from 'express-validator'
-import Stripe from 'stripe'
-
-const stripe = new Stripe(process.env.STRIPE_API_KEY as string)
 
 const HotelsController = {
     createHotel: async (req: Request, res: Response) => {
         try {
+            const existingHotel = await Hotel.findOne({
+                name: req.body.name,
+            })
+            if (existingHotel) {
+                return res
+                    .status(400)
+                    .json({ message: 'Hotel name already exists' })
+            }
             const imageFiles = req.files as Express.Multer.File[]
             const newHotel: HotelType = req.body
 

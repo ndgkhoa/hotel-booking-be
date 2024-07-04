@@ -51,16 +51,18 @@ export type HotelSearchResponse = {
 
 export type ReceiptType = {
     _id: string
-    paymentId: string
     date: Date
     total: number
     userId: string
+    method: string
+    coupon: string
 }
 
 export type BookingType = {
     _id: string
     checkIn: Date
     checkOut: Date
+    date: Date
     status: string
     totalCost: number
     userId: string
