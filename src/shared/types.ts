@@ -40,6 +40,17 @@ export type HotelType = {
     lastUpdate: Date
 }
 
+export type RoomType={
+    _id: string
+    hotelId: string
+    name: string
+    status: string
+    adultCount: number
+    childCount: number
+    pricePerNight: number
+    imageUrls: string[]
+}
+
 export type HotelSearchResponse = {
     data: HotelType[]
     pagination: {

@@ -7,6 +7,8 @@ import usersRoutes from './routes/users'
 import accountRoutes from './routes/accounts'
 import CategoriesRoutes from './routes/categories'
 import hotelsRoutes from './routes/hotels'
+import roomsRoutes from './routes/rooms'
+
 import receiptsRoutes from './routes/receipts'
 import bookingsRoutes from './routes/bookings'
 import bookingDetailsRoutes from './routes/bookingDetails'
