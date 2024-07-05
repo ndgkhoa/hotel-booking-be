@@ -1,8 +1,12 @@
 import jwt from 'jsonwebtoken'
 
-export const generateToken = (userId: string, userRole: string): string => {
+export const generateToken = (
+    accountId: string,
+    userId: string,
+    role: string,
+): string => {
     const token = jwt.sign(
-        { userId, userRole },
+        { accountId, userId, role },
         process.env.JWT_SECRET_KEY as string,
         {
             expiresIn: '1h',
@@ -11,10 +15,6 @@ export const generateToken = (userId: string, userRole: string): string => {
     return token
 }
 
-export const setAuthTokenCookie = (res: any, token: string): void => {
-    res.cookie('auth_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 86400000,
-    })
+export const setAuthTokenHeader = (res: any, token: string): void => {
+    res.set('Authorization', `Bearer ${token}`)
 }

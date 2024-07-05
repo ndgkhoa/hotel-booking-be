@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { generateToken, setAuthTokenCookie } from '../utils/tokenUtils'
+import { generateToken, setAuthTokenHeader } from '../utils/tokenUtils'
 import { comparePasswords, hashPassword } from '../utils/bcryptUtils'
 
 import Account from '../models/account'
@@ -63,8 +63,12 @@ const AuthController = {
             if (!isMatch) {
                 return res.status(400).json({ message: 'Password dont match' })
             }
-            const token = generateToken(account.userId, account.role)
-            setAuthTokenCookie(res, token)
+            const token = generateToken(
+                account.id,
+                account.userId,
+                account.role,
+            )
+            setAuthTokenHeader(res, token)
             res.status(200).send({
                 userId: account.userId,
                 role: account.role,
@@ -80,10 +84,9 @@ const AuthController = {
     },
 
     logout: async (req: Request, res: Response) => {
-        res.cookie('auth_token', '', {
-            expires: new Date(0),
-        })
-        res.send()
+        res.set('Authorization', '')
+
+        res.status(200).send({ message: 'Logged out successfully' })
     },
 }
 module.exports = AuthController
