@@ -55,7 +55,7 @@ const BookingDetailsController = {
         }
     },
 
-    getTotalCostByHotelId: async (req: Request, res: Response) => {
+    getTotalCostOfRoom: async (req: Request, res: Response) => {
         const { roomId } = req.params
         if (!roomId) {
             return res.status(400).json({ message: 'Room ID is required' })
@@ -75,6 +75,33 @@ const BookingDetailsController = {
         } catch (error) {
             console.error('Error retrieving booking details:', error)
             res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    getBookingDetailCountByRoom: async (req: Request, res: Response) => {
+        try {
+            const roomBookingCounts = await BookingDetail.aggregate([
+                {
+                    $group: {
+                        _id: '$roomId',
+                        bookingCount: { $sum: 1 }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        roomId: '$_id',
+                        bookingCount: 1
+                    }
+                }
+            ]);
+            res.status(200).json({
+                message: 'Room booking counts retrieved successfully',
+                data: roomBookingCounts,
+            });
+        } catch (error) {
+            console.error('Error retrieving room booking counts:', error);
+            res.status(500).json({ message: 'Something went wrong' });
         }
     },
 }

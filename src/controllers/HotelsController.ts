@@ -50,7 +50,10 @@ const HotelsController = {
     getAllHotels: async (req: Request, res: Response) => {
         try {
             const hotels = await Hotel.find({ userId: req.userId })
-            res.json(hotels)
+            res.status(200).json({
+                message: 'Get all hotel successfully',
+                data: hotels,
+            })
         } catch (error) {
             res.send(500).json({ message: 'Error fetching hotel' })
         }

@@ -5,9 +5,10 @@ import connectDB from './config/db'
 import authRoutes from './routes/auth'
 import usersRoutes from './routes/users'
 import accountRoutes from './routes/accounts'
-import CategoriesRoutes from './routes/categories'
+import categoriesRoutes from './routes/categories'
 import hotelsRoutes from './routes/hotels'
 import roomsRoutes from './routes/rooms'
+import promotionsRoutes from './routes/promotions'
 
 import receiptsRoutes from './routes/receipts'
 import bookingsRoutes from './routes/bookings'
@@ -35,7 +36,8 @@ app.use('/api/room', roomsRoutes)
 app.use('/api/users', usersRoutes)
 app.use('/api/accounts', accountRoutes)
 app.use('/api/receipts', receiptsRoutes)
-app.use('/api/categories', CategoriesRoutes)
+app.use('/api/categories', categoriesRoutes)
+app.use('/api/promotions', promotionsRoutes)
 app.use('/api/bookings', bookingsRoutes)
 app.use('/api/bookingDetails', bookingDetailsRoutes)
 

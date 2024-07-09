@@ -5,11 +5,13 @@ import upload from '../config/multerConfig'
 const router = express.Router()
 const RoomsController = require('../controllers/RoomsControllers')
 
+router.get('/:hotelId', RoomsController.getAllRoomsOfHotel)
 router.post(
     '/:hotelId',
     verifyToken,
     upload.array('imageFiles', 6),
-    RoomsController.createHotel,
+    RoomsController.createRoom,
 )
+router.get('/:roomId/promotion', RoomsController.getRoomWithPromotion)
 
 export default router
