@@ -82,7 +82,7 @@ export type BookingDetailType = {
     totalCost: number
     adultCount: number
     childCount: number
-    hotelId: string
+    roomId: string
     receiptId: string
     bookingId: string
 }

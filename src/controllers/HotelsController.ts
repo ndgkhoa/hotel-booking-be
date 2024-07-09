@@ -21,7 +21,7 @@ const HotelsController = {
             newHotel.imageUrls = imageUrls
             newHotel.lastUpdate = new Date()
             newHotel.userId = req.userId
-            newHotel.status = 'Available'
+            newHotel.status = 'Active'
 
             const hotel = new Hotel(newHotel)
             await hotel.save()

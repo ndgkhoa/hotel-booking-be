@@ -15,21 +15,15 @@ const RoomsController = {
             }
 
             const imageFiles = req.files as Express.Multer.File[]
-            const {
-                name,
-                status,
-                facilities,
-                adultCount,
-                childCount,
-                pricePerNight,
-            } = req.body
+            const { name, facilities, adultCount, childCount, pricePerNight } =
+                req.body
 
             const imageUrls = await uploadImages(imageFiles)
 
             const newRoom: Omit<RoomType, '_id'> = {
                 hotelId,
                 name,
-                status: status || 'Available',
+                status: 'Available',
                 facilities,
                 adultCount,
                 childCount,
