@@ -12,6 +12,6 @@ const roomSchema = new mongoose.Schema<RoomType>({
     imageUrls: [{ type: String, require: true }],
 })
 
-const Room = mongoose.model<RoomType>('Hotel', roomSchema)
+const Room = mongoose.model<RoomType>('Room', roomSchema)
 
 export default Room
