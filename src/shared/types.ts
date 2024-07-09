@@ -31,22 +31,19 @@ export type HotelType = {
     description: string
     status: string
     categories: string
-    adultCount: number
-    childCount: number
-    facilities: string[]
-    pricePerNight: number
     starRating: number
     imageUrls: string[]
     lastUpdate: Date
 }
 
-export type RoomType={
+export type RoomType = {
     _id: string
     hotelId: string
     name: string
     status: string
     adultCount: number
     childCount: number
+    facilities: string[]
     pricePerNight: number
     imageUrls: string[]
 }

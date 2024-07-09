@@ -8,9 +8,7 @@ import { validationResult } from 'express-validator'
 const HotelsController = {
     createHotel: async (req: Request, res: Response) => {
         try {
-            const existingHotel = await Hotel.findOne({
-                name: req.body.name,
-            })
+            const existingHotel = await Hotel.findOne({ name: req.body.name })
             if (existingHotel) {
                 return res
                     .status(400)
@@ -29,6 +27,7 @@ const HotelsController = {
             await hotel.save()
             res.status(201).json({ message: 'Hotel created successfully' })
         } catch (error) {
+            console.error('Error creating hotel:', error)
             res.status(500).json({ message: 'Something went wrong' })
         }
     },
@@ -146,15 +145,20 @@ const HotelsController = {
 }
 
 async function uploadImages(imageFiles: Express.Multer.File[]) {
-    const uploadPromise = imageFiles.map(async (image) => {
-        const b64 = Buffer.from(image.buffer).toString('base64')
-        let dataURI = 'data:' + image.mimetype + ';base64,' + b64
-        const res = await cloudinary.v2.uploader.upload(dataURI)
-        return res.url
-    })
+    try {
+        const uploadPromise = imageFiles.map(async (image) => {
+            const b64 = Buffer.from(image.buffer).toString('base64')
+            const dataURI = 'data:' + image.mimetype + ';base64,' + b64
+            const res = await cloudinary.v2.uploader.upload(dataURI)
+            return res.url
+        })
 
-    const imageUrls = await Promise.all(uploadPromise)
-    return imageUrls
+        const imageUrls = await Promise.all(uploadPromise)
+        return imageUrls
+    } catch (error) {
+        console.error('Error uploading images:', error)
+        throw new Error('Image upload failed')
+    }
 }
 
 export default HotelsController

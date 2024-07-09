@@ -80,12 +80,15 @@ const AuthController = {
     },
 
     verifyToken: async (req: Request, res: Response) => {
-        res.status(200).send({ userId: req.userId, role: req.role })
+        res.status(200).send({
+            accountId: req.accountId,
+            userId: req.userId,
+            role: req.role,
+        })
     },
 
     logout: async (req: Request, res: Response) => {
         res.set('Authorization', '')
-
         res.status(200).send({ message: 'Logged out successfully' })
     },
 }
