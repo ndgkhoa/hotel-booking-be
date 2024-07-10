@@ -24,24 +24,47 @@ const RoomsController = {
             const newRoom: Omit<RoomType, '_id'> = {
                 hotelId,
                 name,
-                status: 'Available',
+                status: true,
                 facilities,
                 adultCount,
                 childCount,
                 pricePerNight,
                 imageUrls,
+                createDate: new Date(),
             }
 
             const room = new Room(newRoom)
             await room.save()
 
+            if (
+                existingHotel.smallestPrice == 0 ||
+                pricePerNight < existingHotel.smallestPrice
+            )
+                existingHotel.smallestPrice = pricePerNight
+            await existingHotel.save()
+
             res.status(201).json({
                 message: 'Room created successfully',
-                roomId: room._id,
+                data: newRoom,
             })
         } catch (error) {
             console.error('Error creating room:', error)
             res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    getRoom: async (req: Request, res: Response) => {
+        try {
+            const roomId = req.params.roomId
+            const existingRoom = await Room.findById({ _id: roomId })
+            if (!existingRoom)
+                return res.status(400).json({ message: 'Room not found' })
+            res.status(200).json({
+                message: 'Get data successfully',
+                data: existingRoom,
+            })
+        } catch (error) {
+            res.send(500).json({ message: 'Error fetching hotel' })
         }
     },
 
@@ -50,12 +73,23 @@ const RoomsController = {
             const hotelId = req.params.hotelId
             const rooms = await Room.find({ hotelId })
             res.status(200).json({
-                message: 'Get all rooms of hotel successfully',
+                message: 'Get data successfully',
                 data: rooms,
             })
         } catch (error) {
             res.send(500).json({ message: 'Error fetching hotel' })
         }
+    },
+
+    ChangeStatus: async (req: Request, res: Response) => {
+        const roomId = req.params.roomId
+        const room = await Room.findById({ _id: roomId })
+        if (!room) return res.status(500).json({ message: 'Room not found' })
+        room.status = !room.status
+        room.save()
+        return res
+            .status(200)
+            .json({ message: 'Status updated successfully', data: room })
     },
 
     getRoomWithPromotion: async (req: Request, res: Response) => {

@@ -23,7 +23,7 @@ const AccountController = {
             }
             res.status(200).json({
                 message: 'Password updated successfully',
-                account: updatedAccount,
+                data: updatedAccount,
             })
         } catch (error) {
             console.error(error)
@@ -57,7 +57,7 @@ const AccountController = {
                 return res.status(404).json({ message: 'Account not found' })
             }
 
-            const data = {
+            const info = {
                 role: user.role,
                 birthday: user.birthday,
                 address: user.address,
@@ -65,10 +65,12 @@ const AccountController = {
                 email: user.email,
                 firstName: user.firstName,
                 lastName: user.lastName,
-                username:account.username,
+                username: account.username,
                 password: account.password,
             }
-            return res.status(200).json({ data: data })
+            return res
+                .status(200)
+                .json({ message: 'Password updated successfully', data: info })
         } catch (error) {
             console.error(error)
             res.status(500).json({ message: 'Something went wrong' })

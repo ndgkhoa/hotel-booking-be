@@ -28,24 +28,26 @@ export type HotelType = {
     name: string
     city: string
     country: string
+    smallestPrice: number
     description: string
-    status: string
+    status: boolean
     categories: string
     starRating: number
     imageUrls: string[]
-    lastUpdate: Date
+    createDate: Date
 }
 
 export type RoomType = {
     _id: string
     hotelId: string
     name: string
-    status: string
+    status: boolean
     adultCount: number
     childCount: number
     facilities: string[]
     pricePerNight: number
     imageUrls: string[]
+    createDate: Date
 }
 
 export type HotelSearchResponse = {

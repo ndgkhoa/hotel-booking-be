@@ -45,7 +45,7 @@ const AuthController = {
             await newAccount.save()
 
             return res
-                .status(200)
+                .status(201)
                 .send({ message: 'User registered successfully' })
         } catch (error) {
             res.status(500).send({ message: 'Something went wrong' })

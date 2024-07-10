@@ -19,16 +19,33 @@ const HotelsController = {
 
             const imageUrls = await uploadImages(imageFiles)
             newHotel.imageUrls = imageUrls
-            newHotel.lastUpdate = new Date()
+            newHotel.createDate = new Date()
             newHotel.userId = req.userId
-            newHotel.status = 'Active'
+            newHotel.smallestPrice = 0
+            newHotel.status = true
 
             const hotel = new Hotel(newHotel)
             await hotel.save()
-            res.status(201).json({ message: 'Hotel created successfully' })
+            res.status(201).json({
+                message: 'Hotel created successfully',
+                data: newHotel,
+            })
         } catch (error) {
             console.error('Error creating hotel:', error)
             res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    getAllHotels: async (req: Request, res: Response) => {
+        try {
+            const hotels = await Hotel.find()
+            res.status(200).json({
+                message: 'Get data successfully',
+                data: hotels,
+            })
+        } catch (error) {
+            console.log('error', error)
+            res.status(500).json({ message: 'Error fetching hotels' })
         }
     },
 
@@ -37,21 +54,24 @@ const HotelsController = {
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() })
         }
-        const id = req.params.id.toString()
+        const hotelId = req.params.hotelId
         try {
-            const hotel = await Hotel.findById(id)
-            res.json(hotel)
+            const hotel = await Hotel.findById(hotelId)
+            res.status(200).json({
+                message: 'Get data successfully',
+                data: hotel,
+            })
         } catch (error) {
             console.log(error)
             res.status(500).json({ message: 'Error fetching hotel' })
         }
     },
 
-    getAllHotels: async (req: Request, res: Response) => {
+    getAllHotelsOfAuthor: async (req: Request, res: Response) => {
         try {
             const hotels = await Hotel.find({ userId: req.userId })
             res.status(200).json({
-                message: 'Get all hotel successfully',
+                message: 'Get data successfully',
                 data: hotels,
             })
         } catch (error) {
@@ -59,24 +79,9 @@ const HotelsController = {
         }
     },
 
-    deleteHotel: async (req: Request, res: Response) => {
-        try {
-            const hotelId = req.params.hotelId
-            const hotel = await Hotel.findById(hotelId)
-            if (!hotel) {
-                return res.status(404).json({ message: 'Hotel not found' })
-            }
-            await Hotel.findByIdAndDelete(hotelId)
-            res.status(200).json({ message: 'Hotel deleted successfully' })
-        } catch (error) {
-            res.status(500).send({ message: 'Something went wrong' })
-        }
-    },
-
     updateHotel: async (req: Request, res: Response) => {
         try {
             const updatedHotel: HotelType = req.body
-            updatedHotel.lastUpdate = new Date()
             const hotel = await Hotel.findByIdAndUpdate(
                 {
                     _id: req.params.hotelId,
@@ -95,56 +100,70 @@ const HotelsController = {
                 ...(updatedHotel.imageUrls || []),
             ]
             await hotel.save()
-            res.status(201).json(hotel)
+            res.status(200).json({
+                message: 'Update data successfully',
+                data: hotel,
+            })
         } catch (error) {
             res.status(500).json({ message: 'Something went wrong' })
         }
     },
 
-    search: async (req: Request, res: Response) => {
-        try {
-            const query = constructSearchQuery(req.query)
-
-            let sortOptions: any = {}
-            switch (req.query.sortOption) {
-                case 'starRating':
-                    sortOptions = { starRating: -1 }
-                    break
-                case 'pricePerNightAsc':
-                    sortOptions = { pricePerNight: 1 }
-                    break
-                case 'pricePerNightDesc':
-                    sortOptions = { pricePerNight: -1 }
-                    break
-            }
-
-            const pageSize = 5
-            const pageNumber = parseInt(
-                req.query.page ? req.query.page.toString() : '1',
-            )
-            const skip = (pageNumber - 1) * pageSize
-
-            const hotels = await Hotel.find(query)
-                .sort(sortOptions)
-                .skip(skip)
-                .limit(pageSize)
-            const total = await Hotel.countDocuments(query)
-
-            const response: HotelSearchResponse = {
-                data: hotels,
-                pagination: {
-                    total,
-                    page: pageNumber,
-                    pages: Math.ceil(total / pageSize),
-                },
-            }
-
-            res.json(response)
-        } catch (error) {
-            console.log('error', error)
-            res.status(500).json({ message: 'Something went wrong' })
-        }
+    ChangeStatus: async (req: Request, res: Response) => {
+        const hotelId = req.params.hotelId
+        const hotel = await Hotel.findById({ _id: hotelId })
+        if (!hotel) return res.status(500).json({ message: 'Hotel not found' })
+        hotel.status = !hotel.status
+        hotel.save()
+        return res
+            .status(200)
+            .json({ message: 'Status updated successfully', data: hotel })
     },
+
+    // search: async (req: Request, res: Response) => {
+    //     try {
+    //         const query = constructSearchQuery(req.query)
+
+    //         let sortOptions: any = {}
+    //         switch (req.query.sortOption) {
+    //             case 'starRating':
+    //                 sortOptions = { starRating: -1 }
+    //                 break
+    //             case 'pricePerNightAsc':
+    //                 sortOptions = { pricePerNight: 1 }
+    //                 break
+    //             case 'pricePerNightDesc':
+    //                 sortOptions = { pricePerNight: -1 }
+    //                 break
+    //         }
+
+    //         const pageSize = 5
+    //         const pageNumber = parseInt(
+    //             req.query.page ? req.query.page.toString() : '1',
+    //         )
+    //         const skip = (pageNumber - 1) * pageSize
+
+    //         const hotels = await Hotel.find(query)
+    //             .sort(sortOptions)
+    //             .skip(skip)
+    //             .limit(pageSize)
+    //         const total = await Hotel.countDocuments(query)
+
+    //         const response: HotelSearchResponse = {
+    //             data: hotels,
+    //             pagination: {
+    //                 total,
+    //                 page: pageNumber,
+    //                 pages: Math.ceil(total / pageSize),
+    //             },
+    //         }
+
+    //         res.json(response)
+    //     } catch (error) {
+    //         console.log('error', error)
+    //         res.status(500).json({ message: 'Something went wrong' })
+    //     }
+    // },
 }
 
 async function uploadImages(imageFiles: Express.Multer.File[]) {

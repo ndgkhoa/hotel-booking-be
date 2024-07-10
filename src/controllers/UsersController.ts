@@ -17,7 +17,7 @@ const UsersController = {
             res.json(user)
         } catch (error) {
             console.error('Error fetching user:', error)
-            res.status(500).json({ message: 'Something went wrong' })
+            res.status(500).send({ message: 'Failed to get data' })
         }
     },
 
@@ -29,26 +29,27 @@ const UsersController = {
             )
 
             res.status(200).send({
-                message: 'Get all users successfully',
+                message: 'Get data successfully',
                 data: userData,
             })
         } catch (error) {
             console.log(error)
-            res.status(500).send({ message: 'Failed to get all user' })
+            res.status(500).send({ message: 'Failed to get data' })
         }
     },
 
     getHotelFromUser: async (req: Request, res: Response) => {
         const id = req.params.id.toString()
         try {
-            const hotel = await Hotel.findOne({ _id: id, userId: req.userId })
-            res.json(hotel)
+            const hotels = await Hotel.findOne({ _id: id, userId: req.userId })
+            res.status(200).send({
+                message: 'Get data successfully',
+                data: hotels,
+            })
         } catch (error) {
             res.status(500).json({ message: 'Error fetching hotels' })
         }
     },
-
-    
 }
 
 export default UsersController

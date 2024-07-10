@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import BookingDetail from '../models/bookingDetail'
 import { ReceiptType } from '../shared/types'
+import Room from '../models/room'
 
 const BookingDetailsController = {
     createDetail: async (req: Request, res: Response) => {
@@ -23,6 +24,12 @@ const BookingDetailsController = {
             return res.status(400).json({ message: 'All fields are required' })
         }
         try {
+            const room = await Room.findById({ _id: roomId })
+            if (!room)
+                return res.status(404).json({ message: 'Room not found' })
+            room.status = false
+            room.save()
+
             const newBookingDetail = new BookingDetail({
                 totalCost,
                 adultCount,
@@ -46,7 +53,7 @@ const BookingDetailsController = {
         try {
             const bookingDetails = await BookingDetail.find().lean()
             res.status(200).json({
-                message: 'All booking details retrieved successfully',
+                message: 'Get data successfully',
                 data: bookingDetails,
             })
         } catch (error) {
@@ -70,7 +77,7 @@ const BookingDetailsController = {
             )
             res.status(200).json({
                 message: 'Total revenue retrieved successfully',
-                totalRevenue,
+                data:totalRevenue,
             })
         } catch (error) {
             console.error('Error retrieving booking details:', error)
@@ -84,24 +91,24 @@ const BookingDetailsController = {
                 {
                     $group: {
                         _id: '$roomId',
-                        bookingCount: { $sum: 1 }
-                    }
+                        bookingCount: { $sum: 1 },
+                    },
                 },
                 {
                     $project: {
                         _id: 0,
                         roomId: '$_id',
-                        bookingCount: 1
-                    }
-                }
-            ]);
+                        bookingCount: 1,
+                    },
+                },
+            ])
             res.status(200).json({
                 message: 'Room booking counts retrieved successfully',
                 data: roomBookingCounts,
-            });
+            })
         } catch (error) {
-            console.error('Error retrieving room booking counts:', error);
-            res.status(500).json({ message: 'Something went wrong' });
+            console.error('Error retrieving room booking counts:', error)
+            res.status(500).json({ message: 'Something went wrong' })
         }
     },
 }

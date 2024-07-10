@@ -32,7 +32,7 @@ app.use(
 
 app.use('/api/auth', authRoutes)
 app.use('/api/hotels', hotelsRoutes)
-app.use('/api/room', roomsRoutes)
+app.use('/api/rooms', roomsRoutes)
 app.use('/api/users', usersRoutes)
 app.use('/api/accounts', accountRoutes)
 app.use('/api/receipts', receiptsRoutes)

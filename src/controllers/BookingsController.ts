@@ -6,7 +6,7 @@ import Room from '../models/room'
 const BookingsController = {
     booking: async (req: Request, res: Response) => {
         const { checkIn, checkOut, numberOfNights } = req.body
-        const roomId = req.params.hotelId
+        const roomId = req.params.roomId
         const userId = req.userId
         if (!checkIn || !checkOut || !numberOfNights) {
             return res.status(400).json({ message: 'Missing required fields' })
