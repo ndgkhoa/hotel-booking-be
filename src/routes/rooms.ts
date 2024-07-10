@@ -15,5 +15,11 @@ router.get('/:hotelId', RoomsController.getAllRoomsOfHotel)
 router.get('/:roomId/detail', RoomsController.getRoom)
 router.get('/:roomId/change-status', RoomsController.ChangeStatus)
 router.get('/:roomId/promotion', RoomsController.getRoomWithPromotion)
+router.put(
+    '/:roomId',
+    verifyToken,
+    upload.array('imageFiles'),
+    RoomsController.updateRoom,
+)
 
 export default router

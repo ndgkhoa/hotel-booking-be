@@ -81,6 +81,35 @@ const RoomsController = {
         }
     },
 
+    updateRoom: async (req: Request, res: Response) => {
+        try {
+            const updatedRoom: RoomType = req.body
+            const room = await Room.findByIdAndUpdate(
+                {
+                    _id: req.params.roomId,
+                },
+                updatedRoom,
+                { new: true },
+            )
+            if (!room) {
+                return res.status(404).json({ message: 'Hotel not found' })
+            }
+            const files = req.files as Express.Multer.File[]
+            const updatedImageUrls = await uploadImages(files)
+            room.imageUrls = [
+                ...updatedImageUrls,
+                ...(updatedRoom.imageUrls || []),
+            ]
+            await room.save()
+            res.status(200).json({
+                message: 'Update data successfully',
+                data: room,
+            })
+        } catch (error) {
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
     ChangeStatus: async (req: Request, res: Response) => {
         const roomId = req.params.roomId
         const room = await Room.findById({ _id: roomId })
