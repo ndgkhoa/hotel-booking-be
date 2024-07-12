@@ -8,7 +8,7 @@ const BookingSchema = new mongoose.Schema<BookingType>({
     status: { type: String, require: true },
     totalCost: { type: Number, require: true },
     userId: { type: String, require: true },
-    hotelId: { type: String, require: true },
+    roomId: { type: String, require: true },
 })
 
 const Booking = mongoose.model<BookingType>('Booking', BookingSchema)

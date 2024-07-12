@@ -35,6 +35,20 @@ const BookingsController = {
             res.status(500).json({ message: 'Something went wrong' })
         }
     },
+
+    getMyBookings: async (req: Request, res: Response) => {
+        const userId = req.userId
+        try {
+            const bookings = await Booking.find({ userId })
+            res.status(200).json({
+                message: 'Get data successfully',
+                data: bookings,
+            })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
 }
 
 export default BookingsController

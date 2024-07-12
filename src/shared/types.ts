@@ -76,7 +76,7 @@ export type BookingType = {
     status: string
     totalCost: number
     userId: string
-    hotelId: string
+    roomId: string
 }
 
 export type BookingDetailType = {
