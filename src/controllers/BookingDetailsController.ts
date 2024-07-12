@@ -4,51 +4,6 @@ import { ReceiptType } from '../shared/types'
 import Room from '../models/room'
 
 const BookingDetailsController = {
-    createDetail: async (req: Request, res: Response) => {
-        const {
-            totalCost,
-            adultCount,
-            childCount,
-            roomId,
-            receiptId,
-            bookingId,
-        } = req.body
-        if (
-            !totalCost ||
-            !adultCount ||
-            !childCount ||
-            !roomId ||
-            !receiptId ||
-            !bookingId
-        ) {
-            return res.status(400).json({ message: 'All fields are required' })
-        }
-        try {
-            const room = await Room.findById({ _id: roomId })
-            if (!room)
-                return res.status(404).json({ message: 'Room not found' })
-            room.status = false
-            room.save()
-
-            const newBookingDetail = new BookingDetail({
-                totalCost,
-                adultCount,
-                childCount,
-                roomId,
-                receiptId,
-                bookingId,
-            })
-            await newBookingDetail.save()
-            res.status(201).json({
-                message: 'Booking detail created successfully',
-                data: newBookingDetail,
-            })
-        } catch (error) {
-            console.error('Error creating booking detail:', error)
-            res.status(500).json({ message: 'Something went wrong' })
-        }
-    },
-
     getAllDetails: async (req: Request, res: Response) => {
         try {
             const bookingDetails = await BookingDetail.find().lean()
@@ -77,7 +32,7 @@ const BookingDetailsController = {
             )
             res.status(200).json({
                 message: 'Total revenue retrieved successfully',
-                data:totalRevenue,
+                data: totalRevenue,
             })
         } catch (error) {
             console.error('Error retrieving booking details:', error)
