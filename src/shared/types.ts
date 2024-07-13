@@ -62,7 +62,7 @@ export type HotelSearchResponse = {
 export type ReceiptType = {
     _id: string
     date: Date
-    total: number
+    totalCost: number
     userId: string
     method: string
     coupon: string
@@ -73,6 +73,8 @@ export type BookingType = {
     checkIn: Date
     checkOut: Date
     date: Date
+    adultCount: number
+    childCount: number
     status: string
     totalCost: number
     userId: string
@@ -82,9 +84,15 @@ export type BookingType = {
 export type BookingDetailType = {
     _id: string
     totalCost: number
-    adultCount: number
-    childCount: number
     roomId: string
     receiptId: string
     bookingId: string
+}
+
+export type CouponType = {
+    code: string
+    type: 'percentage' | 'fixed'
+    value: number
+    expirationDate: Date
+    isActive: boolean
 }

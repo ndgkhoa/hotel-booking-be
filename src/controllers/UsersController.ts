@@ -50,6 +50,29 @@ const UsersController = {
             res.status(500).json({ message: 'Error fetching hotels' })
         }
     },
+
+    becomeSupplier: async (req: Request, res: Response) => {
+        const userId = req.userId
+        try {
+            const user = await User.findByIdAndUpdate(
+                userId,
+                { role: 'Role_Supplier' },
+                { new: true },
+            )
+
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' })
+            }
+
+            res.status(200).json({
+                message: 'User has become a supplier successfully',
+                data: user,
+            })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
 }
 
 export default UsersController

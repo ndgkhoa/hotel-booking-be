@@ -5,10 +5,10 @@ import Room from '../models/room'
 
 const BookingsController = {
     booking: async (req: Request, res: Response) => {
-        const { checkIn, checkOut, numberOfNights } = req.body
+        const { checkIn, checkOut, adultCount, childCount } = req.body
         const roomId = req.params.roomId
         const userId = req.userId
-        if (!checkIn || !checkOut || !numberOfNights) {
+        if (!checkIn || !checkOut || !adultCount || !childCount) {
             return res.status(400).json({ message: 'Missing required fields' })
         }
         try {
@@ -16,14 +16,30 @@ const BookingsController = {
             if (!room) {
                 return res.status(400).json({ message: 'Room not found' })
             }
+
+            const checkInDate = new Date(checkIn)
+            const checkOutDate = new Date(checkOut)
+            const timeDifference =
+                checkOutDate.getTime() - checkInDate.getTime()
+            const numberOfNights = timeDifference / (1000 * 3600 * 24)
+
             const totalCost = parseFloat(
                 (room.pricePerNight * numberOfNights).toFixed(2),
             )
+
+            if (numberOfNights <= 0) {
+                return res
+                    .status(400)
+                    .json({ message: 'Invalid check-in or check-out dates' })
+            }
+
             const newBooking = new Booking({
                 checkIn,
                 checkOut,
                 date: new Date(),
                 status: 'Pending',
+                adultCount,
+                childCount,
                 totalCost,
                 userId,
                 roomId,
@@ -43,6 +59,34 @@ const BookingsController = {
             res.status(200).json({
                 message: 'Get data successfully',
                 data: bookings,
+            })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    getHotelFromBookingId: async (req: Request, res: Response) => {
+        const bookingId = req.params.bookingId
+        try {
+            const booking = await Booking.findById({ _id: bookingId })
+            if (!booking)
+                return res.status(400).json({ message: 'Booking not found' })
+
+            const roomId = booking.roomId
+            const room = await Room.findById({ _id: roomId })
+            if (!room) {
+                return res.status(404).json({ message: 'Room not found' })
+            }
+
+            const hotelId = room.hotelId
+            const hotel = await Hotel.findById({ _id: hotelId })
+            if (!hotel) {
+                return res.status(404).json({ message: 'Hotel not found' })
+            }
+            res.status(200).json({
+                message: 'Get data successfully',
+                data: hotel,
             })
         } catch (error) {
             console.error(error)

@@ -8,5 +8,10 @@ const router = express.Router()
 
 router.get('/', verifyToken, BookingsController.getMyBookings)
 router.post('/:roomId', verifyToken, BookingsController.booking)
+router.get(
+    '/:bookingId/get-hotel',
+    verifyToken,
+    BookingsController.getHotelFromBookingId,
+)
 
 export default router

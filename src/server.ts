@@ -9,7 +9,7 @@ import categoriesRoutes from './routes/categories'
 import hotelsRoutes from './routes/hotels'
 import roomsRoutes from './routes/rooms'
 import promotionsRoutes from './routes/promotions'
-
+import couponRoutes from './routes/coupons'
 import receiptsRoutes from './routes/receipts'
 import bookingsRoutes from './routes/bookings'
 import bookingDetailsRoutes from './routes/bookingDetails'
@@ -38,6 +38,7 @@ app.use('/api/accounts', accountRoutes)
 app.use('/api/receipts', receiptsRoutes)
 app.use('/api/categories', categoriesRoutes)
 app.use('/api/promotions', promotionsRoutes)
+app.use('/api/coupons', couponRoutes)
 app.use('/api/bookings', bookingsRoutes)
 app.use('/api/bookingDetails', bookingDetailsRoutes)
 
