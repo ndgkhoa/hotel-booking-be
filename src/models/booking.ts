@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import { BookingType } from '../shared/types'
 
-const BookingSchema = new mongoose.Schema<BookingType>({
+const bookingSchema = new mongoose.Schema<BookingType>({
     checkIn: { type: Date, require: true },
     checkOut: { type: Date, require: true },
     date: { type: Date, require: true },
@@ -13,6 +13,6 @@ const BookingSchema = new mongoose.Schema<BookingType>({
     roomId: { type: String, require: true },
 })
 
-const Booking = mongoose.model<BookingType>('Booking', BookingSchema)
+const Booking = mongoose.model<BookingType>('Booking', bookingSchema)
 
 export default Booking

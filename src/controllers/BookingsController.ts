@@ -52,6 +52,22 @@ const BookingsController = {
         }
     },
 
+    getBooking: async (req: Request, res: Response) => {
+        const bookingId = req.params.bookingId
+        try {
+            const booking = await Booking.findById({ _id: bookingId })
+            if (!booking)
+                return res.status(400).json({ message: 'Booking not found' })
+            res.status(200).json({
+                message: 'Get data successfully',
+                data: booking,
+            })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
     getMyBookings: async (req: Request, res: Response) => {
         const userId = req.userId
         try {
