@@ -7,67 +7,76 @@ import Coupon from '../models/coupon'
 
 const ReceiptsController = {
     createReceipt: async (req: Request, res: Response) => {
-        const { totalCost, method, coupon } = req.body;
-        let totalCostAfterDiscount = totalCost;
-        const userId = req.userId;
-        const bookingId = req.params.bookingId;
-    
+        const { totalCost, method, coupon } = req.body
+        let totalCostAfterDiscount = totalCost
+        const userId = req.userId
+        const bookingId = req.params.bookingId
+
         try {
-            const booking = await Booking.findById({ _id: bookingId });
+            const booking = await Booking.findById({ _id: bookingId })
             if (!booking) {
-                return res.status(404).json({ message: 'Booking not found' });
+                return res.status(404).json({ message: 'Booking not found' })
             }
-    
-            const roomId = booking.roomId;
-            const room = await Room.findById({ _id: roomId });
+
+            const roomId = booking.roomId
+            const room = await Room.findById({ _id: roomId })
             if (!room) {
-                return res.status(404).json({ message: 'Room not found' });
+                return res.status(404).json({ message: 'Room not found' })
             }
-    
+
             if (coupon) {
-                const foundCoupon = await Coupon.findOne({ code: coupon, isActive: true, expirationDate: { $gte: new Date() } });
+                const foundCoupon = await Coupon.findOne({
+                    code: coupon,
+                    isActive: true,
+                    expirationDate: { $gte: new Date() },
+                })
                 if (foundCoupon) {
                     if (foundCoupon.type === 'percentage') {
-                        totalCostAfterDiscount = totalCost - (totalCost * foundCoupon.value / 100);
+                        totalCostAfterDiscount =
+                            totalCost - (totalCost * foundCoupon.value) / 100
                     } else if (foundCoupon.type === 'fixed') {
-                        totalCostAfterDiscount = totalCost - foundCoupon.value;
+                        totalCostAfterDiscount = totalCost - foundCoupon.value
                     }
-                    totalCostAfterDiscount = Math.max(totalCostAfterDiscount, 0);
+                    totalCostAfterDiscount = Math.max(totalCostAfterDiscount, 0)
                 } else {
-                    return res.status(400).json({ message: 'Invalid or expired coupon' });
+                    return res
+                        .status(400)
+                        .json({ message: 'Invalid or expired coupon' })
                 }
             }
-    
-            room.status = false;
-            await room.save();
-    
+
+            room.status = false
+            await room.save()
+
+            booking.status = true
+            await booking.save()
+
             const newReceipt = new Receipt({
                 method,
                 coupon,
                 date: new Date(),
                 totalCost: parseFloat(totalCostAfterDiscount.toFixed(2)),
                 userId,
-            });
-            await newReceipt.save();
-    
+            })
+            await newReceipt.save()
+
             const newBookingDetail = new BookingDetail({
                 totalCost: totalCostAfterDiscount,
                 roomId,
                 receiptId: newReceipt._id,
                 bookingId,
-            });
-            await newBookingDetail.save();
-    
+            })
+            await newBookingDetail.save()
+
             res.status(201).json({
                 message: 'Receipt created successfully',
                 data: newReceipt,
-            });
+            })
         } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Something went wrong' });
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
         }
-    }
-    
+    },
 }
 
 export default ReceiptsController

@@ -75,7 +75,7 @@ export type BookingType = {
     date: Date
     adultCount: number
     childCount: number
-    status: string
+    status: boolean
     totalCost: number
     userId: string
     roomId: string

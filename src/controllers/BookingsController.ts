@@ -37,7 +37,7 @@ const BookingsController = {
                 checkIn,
                 checkOut,
                 date: new Date(),
-                status: 'Pending',
+                status: false,
                 adultCount,
                 childCount,
                 totalCost,
