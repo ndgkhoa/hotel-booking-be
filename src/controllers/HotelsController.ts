@@ -1,8 +1,7 @@
 import { Request, Response } from 'express'
 import cloudinary from 'cloudinary'
-import { BookingType, HotelSearchResponse, HotelType } from '../shared/types'
+import { HotelType } from '../shared/types'
 import Hotel from '../models/hotel'
-import { constructSearchQuery } from '../utils/searchQueryUtils'
 import { validationResult } from 'express-validator'
 
 const HotelsController = {
@@ -21,7 +20,6 @@ const HotelsController = {
             newHotel.imageUrls = imageUrls
             newHotel.createDate = new Date()
             newHotel.userId = req.userId
-            newHotel.smallestPrice = 0
             newHotel.status = true
 
             const hotel = new Hotel(newHotel)
@@ -119,51 +117,6 @@ const HotelsController = {
             .status(200)
             .json({ message: 'Status updated successfully', data: hotel })
     },
-
-    // search: async (req: Request, res: Response) => {
-    //     try {
-    //         const query = constructSearchQuery(req.query)
-
-    //         let sortOptions: any = {}
-    //         switch (req.query.sortOption) {
-    //             case 'starRating':
-    //                 sortOptions = { starRating: -1 }
-    //                 break
-    //             case 'pricePerNightAsc':
-    //                 sortOptions = { pricePerNight: 1 }
-    //                 break
-    //             case 'pricePerNightDesc':
-    //                 sortOptions = { pricePerNight: -1 }
-    //                 break
-    //         }
-
-    //         const pageSize = 5
-    //         const pageNumber = parseInt(
-    //             req.query.page ? req.query.page.toString() : '1',
-    //         )
-    //         const skip = (pageNumber - 1) * pageSize
-
-    //         const hotels = await Hotel.find(query)
-    //             .sort(sortOptions)
-    //             .skip(skip)
-    //             .limit(pageSize)
-    //         const total = await Hotel.countDocuments(query)
-
-    //         const response: HotelSearchResponse = {
-    //             data: hotels,
-    //             pagination: {
-    //                 total,
-    //                 page: pageNumber,
-    //                 pages: Math.ceil(total / pageSize),
-    //             },
-    //         }
-
-    //         res.json(response)
-    //     } catch (error) {
-    //         console.log('error', error)
-    //         res.status(500).json({ message: 'Something went wrong' })
-    //     }
-    // },
 }
 
 async function uploadImages(imageFiles: Express.Multer.File[]) {

@@ -36,13 +36,6 @@ const RoomsController = {
             const room = new Room(newRoom)
             await room.save()
 
-            if (
-                existingHotel.smallestPrice == 0 ||
-                pricePerNight < existingHotel.smallestPrice
-            )
-                existingHotel.smallestPrice = pricePerNight
-            await existingHotel.save()
-
             res.status(201).json({
                 message: 'Room created successfully',
                 data: newRoom,

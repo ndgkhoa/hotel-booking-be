@@ -2,6 +2,8 @@ import { Request, Response } from 'express'
 import Booking from '../models/booking'
 import Hotel from '../models/hotel'
 import Room from '../models/room'
+import User from '../models/user'
+import { sendBookingConfirmation } from '../utils/mailer'
 
 const BookingsController = {
     booking: async (req: Request, res: Response) => {
@@ -36,7 +38,7 @@ const BookingsController = {
             const newBooking = new Booking({
                 checkIn,
                 checkOut,
-                date: new Date(),
+                bookingDate: new Date(),
                 status: false,
                 adultCount,
                 childCount,
@@ -45,6 +47,20 @@ const BookingsController = {
                 roomId,
             })
             await newBooking.save()
+
+            const user = await User.findById({ _id: userId })
+            if (user) {
+                await sendBookingConfirmation(user.email, {
+                    checkIn,
+                    checkOut,
+                    adultCount,
+                    childCount,
+                    totalCost,
+                    bookingDate: newBooking.bookingDate,
+                    userName: user.firstName + ' ' + user.lastName,
+                })
+            }
+
             res.status(201).send(newBooking)
         } catch (error) {
             console.error(error)

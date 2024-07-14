@@ -28,7 +28,6 @@ export type HotelType = {
     name: string
     city: string
     country: string
-    smallestPrice: number
     description: string
     status: boolean
     categories: string
@@ -50,15 +49,6 @@ export type RoomType = {
     createDate: Date
 }
 
-export type HotelSearchResponse = {
-    data: HotelType[]
-    pagination: {
-        total: number
-        page: number
-        pages: number
-    }
-}
-
 export type ReceiptType = {
     _id: string
     date: Date
@@ -72,7 +62,7 @@ export type BookingType = {
     _id: string
     checkIn: Date
     checkOut: Date
-    date: Date
+    bookingDate: Date
     adultCount: number
     childCount: number
     status: boolean

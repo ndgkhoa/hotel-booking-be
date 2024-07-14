@@ -4,7 +4,7 @@ import { BookingType } from '../shared/types'
 const bookingSchema = new mongoose.Schema<BookingType>({
     checkIn: { type: Date, require: true },
     checkOut: { type: Date, require: true },
-    date: { type: Date, require: true },
+    bookingDate: { type: Date, require: true },
     adultCount: { type: Number, require: true },
     childCount: { type: Number, require: true },
     status: { type: Boolean, require: true },

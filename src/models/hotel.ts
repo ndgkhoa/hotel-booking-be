@@ -6,7 +6,6 @@ const hotelSchema = new mongoose.Schema<HotelType>({
     name: { type: String, require: true },
     city: { type: String, require: true },
     country: { type: String, require: true },
-    smallestPrice: { type: Number, require: true },
     description: { type: String, require: true },
     status: { type: Boolean, require: true },
     categories: { type: String, require: true },
