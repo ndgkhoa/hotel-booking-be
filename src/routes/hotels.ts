@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express'
+import express from 'express'
 import upload from '../config/multerConfig'
 import HotelsController from '../controllers/HotelsController'
 import verifyToken from '../middlewares/auth'
@@ -30,7 +30,7 @@ router.put(
 router.put(
     '/:hotelId/change-status',
     verifyToken,
-    HotelsController.ChangeStatus,
+    HotelsController.changeStatus,
 )
 
 export default router

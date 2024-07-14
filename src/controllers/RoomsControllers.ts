@@ -21,7 +21,7 @@ const RoomsController = {
 
             const imageUrls = await uploadImages(imageFiles)
 
-            const newRoom: Omit<RoomType, '_id'> = {
+            const newRoom = new Room({
                 hotelId,
                 name,
                 status: true,
@@ -30,11 +30,11 @@ const RoomsController = {
                 childCount,
                 pricePerNight,
                 imageUrls,
-                createDate: new Date(),
-            }
+                bookedTime: 0,
+                bookedLastest: null,
+            })
 
-            const room = new Room(newRoom)
-            await room.save()
+            await newRoom.save()
 
             res.status(201).json({
                 message: 'Room created successfully',
@@ -103,7 +103,7 @@ const RoomsController = {
         }
     },
 
-    ChangeStatus: async (req: Request, res: Response) => {
+    changeStatus: async (req: Request, res: Response) => {
         const roomId = req.params.roomId
         const room = await Room.findById({ _id: roomId })
         if (!room) return res.status(500).json({ message: 'Room not found' })
@@ -144,6 +144,41 @@ const RoomsController = {
             })
         } catch (error) {
             console.error('Error retrieving room details:', error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    resetStatus: async (req: Request, res: Response) => {
+        const hotelId = req.params.hotelId
+
+        try {
+            const rooms = await Room.find({ hotelId })
+
+            const currentTime = new Date()
+            for (const room of rooms) {
+                if (room.bookedLastest) {
+                    const bookedLastest = new Date(room.bookedLastest as any)
+                    const timeDifference =
+                        currentTime.getTime() - bookedLastest.getTime()
+                    const hoursDifference = Math.ceil(
+                        timeDifference / (1000 * 60 * 60),
+                    )
+                    room.bookedTime = hoursDifference
+
+                    if (hoursDifference <= 0) {
+                        room.status = true
+                    }
+                }
+
+                await room.save()
+            }
+
+            res.status(200).json({
+                message: 'Rooms status reset successfully',
+                data: rooms,
+            })
+        } catch (error) {
+            console.error('Error resetting room status:', error)
             res.status(500).json({ message: 'Something went wrong' })
         }
     },

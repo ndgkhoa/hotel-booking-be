@@ -4,23 +4,10 @@ import Promotion from '../models/promotion'
 
 const PromotionController = {
     createPromotion: async (req: Request, res: Response) => {
-        const {
-            name,
-            discountPercentage,
-            startDate,
-            endDate,
-            status,
-            hotelId,
-        } = req.body
+        const { name, discountPercentage, startDate, endDate, status } =
+            req.body
 
-        if (
-            !name ||
-            !discountPercentage ||
-            !startDate ||
-            !endDate ||
-            !status ||
-            !hotelId
-        ) {
+        if (!name || !discountPercentage || !startDate || !endDate || !status) {
             return res.status(400).json({ message: 'All fields are required' })
         }
 
@@ -29,7 +16,6 @@ const PromotionController = {
             const imageUrl = await uploadImage(imageFile)
 
             const newPromotion = new Promotion({
-                hotelId,
                 name,
                 discountPercentage,
                 startDate,
@@ -48,6 +34,30 @@ const PromotionController = {
             console.error('Error creating promotion:', error)
             res.status(500).json({ message: 'Something went wrong' })
         }
+    },
+
+    getAll: async (req: Request, res: Response) => {
+        try {
+            const promotions = await Promotion.find()
+            res.status(200).json({
+                message: 'Get data successfully',
+                data: promotions,
+            })
+        } catch (error) {
+            res.send(500).json({ message: 'Error fetching hotel' })
+        }
+    },
+
+    changeStatus: async (req: Request, res: Response) => {
+        const promotionId = req.params.promotionId
+        const promotion = await Promotion.findById({ _id: promotionId })
+        if (!promotion)
+            return res.status(500).json({ message: 'Promotion not found' })
+        promotion.status = !promotion.status
+        promotion.save()
+        return res
+            .status(200)
+            .json({ message: 'Status updated successfully', data: promotion })
     },
 }
 

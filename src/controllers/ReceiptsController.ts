@@ -45,11 +45,22 @@ const ReceiptsController = {
                 }
             }
 
-            room.status = false
-            await room.save()
-
             booking.status = true
+            let checkOut: any = booking.checkOut
+            if (!(checkOut instanceof Date)) {
+                checkOut = new Date(checkOut)
+            }
             await booking.save()
+
+            const currentTime = new Date()
+            const hoursDifference = Math.ceil(
+                (checkOut.getTime() - currentTime.getTime()) / (1000 * 60 * 60),
+            )
+
+            room.status = false
+            room.bookedTime = hoursDifference
+            room.bookedLastest = checkOut
+            await room.save()
 
             const newReceipt = new Receipt({
                 method,

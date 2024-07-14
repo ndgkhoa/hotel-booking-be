@@ -13,7 +13,7 @@ router.post(
 )
 router.get('/:hotelId', RoomsController.getAllRoomsOfHotel)
 router.get('/:roomId/detail', RoomsController.getRoom)
-router.get('/:roomId/change-status', RoomsController.ChangeStatus)
+router.get('/:roomId/change-status', RoomsController.changeStatus)
 router.get('/:roomId/promotion', RoomsController.getRoomWithPromotion)
 router.put(
     '/:roomId',
@@ -21,5 +21,6 @@ router.put(
     upload.array('imageFiles'),
     RoomsController.updateRoom,
 )
+router.put('/:hotelId/reset-status', verifyToken, RoomsController.resetStatus)
 
 export default router

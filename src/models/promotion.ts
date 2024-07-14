@@ -7,17 +7,22 @@ interface PromotionType {
     startDate: Date
     endDate: Date
     imageUrl: string
-    status: string
+    status: boolean
 }
 
-const promotionSchema = new mongoose.Schema<PromotionType>({
-    name: { type: String, required: true },
-    discountPercentage: { type: Number, required: true },
-    startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true },
-    imageUrl: { type: String, required: true },
-    status: { type: String, required: true },
-})
+const promotionSchema = new mongoose.Schema<PromotionType>(
+    {
+        name: { type: String, required: true },
+        discountPercentage: { type: Number, required: true },
+        startDate: { type: Date, required: true },
+        endDate: { type: Date, required: true },
+        imageUrl: { type: String, required: true },
+        status: { type: Boolean, required: true },
+    },
+    {
+        timestamps: true,
+    },
+)
 
 const Promotion = mongoose.model<PromotionType>('Promotion', promotionSchema)
 

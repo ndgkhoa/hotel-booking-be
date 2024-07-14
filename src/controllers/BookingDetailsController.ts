@@ -1,7 +1,5 @@
 import { Request, Response } from 'express'
 import BookingDetail from '../models/bookingDetail'
-import { ReceiptType } from '../shared/types'
-import Room from '../models/room'
 
 const BookingDetailsController = {
     getAllDetails: async (req: Request, res: Response) => {

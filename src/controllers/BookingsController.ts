@@ -49,17 +49,20 @@ const BookingsController = {
             await newBooking.save()
 
             const user = await User.findById({ _id: userId })
-            if (user) {
-                await sendBookingConfirmation(user.email, {
-                    checkIn,
-                    checkOut,
-                    adultCount,
-                    childCount,
-                    totalCost,
-                    bookingDate: newBooking.bookingDate,
-                    userName: user.firstName + ' ' + user.lastName,
-                })
-            }
+            // if (user) {
+            //     await sendBookingConfirmation(user.email, {
+            //         checkIn,
+            //         checkOut,
+            //         adultCount,
+            //         childCount,
+            //         totalCost,
+            //         bookingDate:
+            //             newBooking.bookingDate instanceof Date
+            //                 ? newBooking.bookingDate
+            //                 : undefined,
+            //         userName: user.firstName + ' ' + user.lastName,
+            //     })
+            // }
 
             res.status(201).send(newBooking)
         } catch (error) {

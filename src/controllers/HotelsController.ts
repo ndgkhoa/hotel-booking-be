@@ -18,7 +18,6 @@ const HotelsController = {
 
             const imageUrls = await uploadImages(imageFiles)
             newHotel.imageUrls = imageUrls
-            newHotel.createDate = new Date()
             newHotel.userId = req.userId
             newHotel.status = true
 
@@ -107,7 +106,7 @@ const HotelsController = {
         }
     },
 
-    ChangeStatus: async (req: Request, res: Response) => {
+    changeStatus: async (req: Request, res: Response) => {
         const hotelId = req.params.hotelId
         const hotel = await Hotel.findById({ _id: hotelId })
         if (!hotel) return res.status(500).json({ message: 'Hotel not found' })

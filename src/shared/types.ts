@@ -1,3 +1,5 @@
+import { Date } from 'mongoose'
+
 export type AccountType = {
     _id: string
     userId: string
@@ -33,7 +35,6 @@ export type HotelType = {
     categories: string
     starRating: number
     imageUrls: string[]
-    createDate: Date
 }
 
 export type RoomType = {
@@ -43,10 +44,11 @@ export type RoomType = {
     status: boolean
     adultCount: number
     childCount: number
+    bookedTime: number
+    bookedLastest: Date | null
     facilities: string[]
     pricePerNight: number
     imageUrls: string[]
-    createDate: Date
 }
 
 export type ReceiptType = {
