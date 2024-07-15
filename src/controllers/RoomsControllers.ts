@@ -31,7 +31,7 @@ const RoomsController = {
                 pricePerNight,
                 imageUrls,
                 bookedTime: 0,
-                bookedLastest: null,
+                bookedLatest: null,
             })
 
             await newRoom.save()
@@ -156,8 +156,8 @@ const RoomsController = {
 
             const currentTime = new Date()
             for (const room of rooms) {
-                if (room.bookedLastest) {
-                    const bookedLastest = new Date(room.bookedLastest as any)
+                if (room.bookedLatest) {
+                    const bookedLastest = new Date(room.bookedLatest as any)
                     const timeDifference =
                         currentTime.getTime() - bookedLastest.getTime()
                     const hoursDifference = Math.ceil(

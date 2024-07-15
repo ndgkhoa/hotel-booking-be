@@ -10,7 +10,7 @@ const roomSchema = new mongoose.Schema<RoomType>(
         adultCount: { type: Number, required: true },
         childCount: { type: Number, required: true },
         bookedTime: { type: Number, default: null },
-        bookedLastest: { type: Date, default: null },
+        bookedLatest: { type: Date, default: null },
         pricePerNight: { type: Number, required: true },
         imageUrls: [{ type: String, required: true }],
     },

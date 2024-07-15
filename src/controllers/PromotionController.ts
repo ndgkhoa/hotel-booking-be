@@ -4,10 +4,9 @@ import Promotion from '../models/promotion'
 
 const PromotionController = {
     createPromotion: async (req: Request, res: Response) => {
-        const { name, discountPercentage, startDate, endDate, status } =
-            req.body
+        const { name, discountPercentage, startDate, endDate } = req.body
 
-        if (!name || !discountPercentage || !startDate || !endDate || !status) {
+        if (!name || !discountPercentage || !startDate || !endDate) {
             return res.status(400).json({ message: 'All fields are required' })
         }
 
@@ -21,7 +20,7 @@ const PromotionController = {
                 startDate,
                 endDate,
                 imageUrl,
-                status,
+                status: false,
             })
 
             await newPromotion.save()
