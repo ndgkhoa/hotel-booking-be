@@ -10,5 +10,9 @@ router.get(
     '/count-by-room',
     BookingDetailsController.getBookingDetailCountByRoom,
 )
+router.get(
+    '/calculateMonthlyRevenue',
+    BookingDetailsController.calculateMonthlyRevenue,
+)
 
 export default router

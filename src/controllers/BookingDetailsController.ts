@@ -64,6 +64,45 @@ const BookingDetailsController = {
             res.status(500).json({ message: 'Something went wrong' })
         }
     },
+
+    calculateMonthlyRevenue: async (req: Request, res: Response) => {
+        // try {
+        //     // Query booking details based on hotelId
+        //     const bookingDetails = await BookingDetail.find({ hotelId });
+        //     // Initialize an object to store revenue per room per month
+        //     const revenueByRoom = {};
+        //     // Process each booking detail
+        //     for (const bookingDetail of bookingDetails) {
+        //         // Extract receiptId
+        //         const receiptId = bookingDetail.receiptId;
+        //         // Query receipt to get createdAt
+        //         const receipt = await Receipt.findById(receiptId);
+        //         if (receipt) {
+        //             // Get createdAt date and extract month
+        //             const createdAt = new Date(receipt.createdAt);
+        //             const month = createdAt.getMonth() + 1; // JavaScript months are 0-based
+        //             // Calculate total revenue for this booking detail
+        //             const revenue = bookingDetail.totalCost;
+        //             // Initialize revenue for this room if it doesn't exist
+        //             if (!revenueByRoom[bookingDetail.roomId]) {
+        //                 revenueByRoom[bookingDetail.roomId] = {};
+        //             }
+        //             // Initialize revenue for this month if it doesn't exist
+        //             if (!revenueByRoom[bookingDetail.roomId][month]) {
+        //                 revenueByRoom[bookingDetail.roomId][month] = 0;
+        //             }
+        //             // Add revenue to existing revenue for this month and room
+        //             revenueByRoom[bookingDetail.roomId][month] += revenue;
+        //         }
+        //     }
+        //     // Log or return revenueByRoom object
+        //     console.log('Revenue by room:', revenueByRoom);
+        //     return revenueByRoom;
+        // } catch (error) {
+        //     console.error('Error calculating revenue:', error);
+        //     throw error;
+        // }
+    },
 }
 
 export default BookingDetailsController

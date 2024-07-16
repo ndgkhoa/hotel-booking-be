@@ -52,13 +52,7 @@ const ReceiptsController = {
             }
             await booking.save()
 
-            const currentTime = new Date()
-            const hoursDifference = Math.ceil(
-                (checkOut.getTime() - currentTime.getTime()) / (1000 * 60 * 60),
-            )
-
             room.status = false
-            room.bookedTime = hoursDifference
             room.bookedLatest = checkOut
             await room.save()
 

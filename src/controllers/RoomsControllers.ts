@@ -174,7 +174,7 @@ const RoomsController = {
                 if (room.bookedLatest) {
                     const bookedLastest = new Date(room.bookedLatest as any)
                     const timeDifference =
-                        currentTime.getTime() - bookedLastest.getTime()
+                        bookedLastest.getTime() - currentTime.getTime()
                     const hoursDifference = Math.ceil(
                         timeDifference / (1000 * 60 * 60),
                     )
@@ -182,7 +182,7 @@ const RoomsController = {
 
                     if (hoursDifference <= 0) {
                         room.status = true
-                    }
+                    } else room.status = false
                 }
 
                 await room.save()
