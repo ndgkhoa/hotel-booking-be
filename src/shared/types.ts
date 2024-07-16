@@ -49,11 +49,11 @@ export type RoomType = {
     facilities: string[]
     pricePerNight: number
     imageUrls: string[]
+    discountRate: Number
 }
 
 export type ReceiptType = {
     _id: string
-    date: Date
     totalCost: number
     userId: string
     method: string
@@ -64,13 +64,14 @@ export type BookingType = {
     _id: string
     checkIn: Date
     checkOut: Date
-    bookingDate: Date
     adultCount: number
     childCount: number
     status: boolean
     totalCost: number
     userId: string
     roomId: string
+    createdAt?: Date
+    updatedAt?: Date
 }
 
 export type BookingDetailType = {

@@ -32,6 +32,7 @@ const RoomsController = {
                 imageUrls,
                 bookedTime: 0,
                 bookedLatest: null,
+                discountRate: 1,
             })
 
             await newRoom.save()
@@ -64,13 +65,61 @@ const RoomsController = {
     getAllRoomsOfHotel: async (req: Request, res: Response) => {
         try {
             const hotelId = req.params.hotelId
-            const rooms = await Room.find({ hotelId })
+            const rooms = await Room.find({ hotelId }).lean()
+
+            if (rooms.length === 0) {
+                return res
+                    .status(404)
+                    .json({ message: 'No rooms found for this hotel' })
+            }
+
+            const currentDate = new Date()
+
+            const activePromotions = await Promotion.find({
+                startDate: { $lte: currentDate },
+                endDate: { $gte: currentDate },
+                status: true,
+            }).lean()
+
+            let maxDiscountPromotion = null
+
+            if (activePromotions.length > 0) {
+                maxDiscountPromotion = activePromotions.reduce(
+                    (max, promotion) => {
+                        return promotion.discountPercentage >
+                            max.discountPercentage
+                            ? promotion
+                            : max
+                    },
+                )
+            }
+
+            const roomsWithFinalPrice = rooms.map((room) => {
+                let discountRate = 1
+                let finalPrice = room.pricePerNight
+
+                if (maxDiscountPromotion) {
+                    discountRate =
+                        1 - maxDiscountPromotion.discountPercentage / 100
+                    finalPrice = room.pricePerNight * discountRate
+                }
+
+                return { ...room, finalPrice, discountRate }
+            })
+
+            for (const room of roomsWithFinalPrice) {
+                await Room.findByIdAndUpdate(room._id, {
+                    discountRate: room.discountRate,
+                })
+            }
+
             res.status(200).json({
                 message: 'Get data successfully',
-                data: rooms,
+                data: roomsWithFinalPrice,
             })
         } catch (error) {
-            res.send(500).json({ message: 'Error fetching hotel' })
+            console.error('Error fetching hotel rooms:', error)
+            res.status(500).json({ message: 'Error fetching hotel rooms' })
         }
     },
 
@@ -112,40 +161,6 @@ const RoomsController = {
         return res
             .status(200)
             .json({ message: 'Status updated successfully', data: room })
-    },
-
-    getRoomWithPromotion: async (req: Request, res: Response) => {
-        const { roomId } = req.params
-
-        if (!roomId) {
-            return res.status(400).json({ message: 'Room ID is required' })
-        }
-
-        try {
-            const room = await Room.findById(roomId).lean()
-            if (!room) {
-                return res.status(404).json({ message: 'Room not found' })
-            }
-
-            const currentDate = new Date()
-
-            const activePromotions = await Promotion.find({
-                startDate: { $lte: currentDate },
-                endDate: { $gte: currentDate },
-            }).lean()
-
-            const finalPrice = activePromotions.reduce((price, promotion) => {
-                return price * (1 - promotion.discountPercentage / 100)
-            }, room.pricePerNight)
-
-            res.status(200).json({
-                message: 'Room details retrieved successfully',
-                data: { ...room, finalPrice },
-            })
-        } catch (error) {
-            console.error('Error retrieving room details:', error)
-            res.status(500).json({ message: 'Something went wrong' })
-        }
     },
 
     resetStatus: async (req: Request, res: Response) => {

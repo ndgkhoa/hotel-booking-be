@@ -3,7 +3,6 @@ import { ReceiptType } from '../shared/types'
 
 const ReceiptSchema = new mongoose.Schema<ReceiptType>(
     {
-        date: { type: Date, required: true },
         totalCost: { type: Number, required: true },
         userId: { type: String, required: true },
         method: { type: String, required: true },

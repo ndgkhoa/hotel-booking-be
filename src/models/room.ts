@@ -13,6 +13,7 @@ const roomSchema = new mongoose.Schema<RoomType>(
         bookedLatest: { type: Date, default: null },
         pricePerNight: { type: Number, required: true },
         imageUrls: [{ type: String, required: true }],
+        discountRate: { type: Number, default: 1, min: 0.1, max: 1 },
     },
     {
         timestamps: true,

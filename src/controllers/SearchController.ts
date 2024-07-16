@@ -8,7 +8,7 @@ const search = async (req: Request, res: Response) => {
             hotelName,
             city,
             country,
-            maxStarRating,
+            minStarRating,
             maxPrice,
             adultCount,
             childCount,
@@ -37,8 +37,8 @@ const search = async (req: Request, res: Response) => {
             }
             hotelQuery.$or = destinationQuery
         }
-        if (maxStarRating) {
-            hotelQuery.starRating = { $lte: parseInt(maxStarRating as string) }
+        if (minStarRating) {
+            hotelQuery.starRating = { $gte: parseInt(minStarRating as string) }
         }
         if (categories) {
             hotelQuery.categories = { $regex: categories, $options: 'i' }

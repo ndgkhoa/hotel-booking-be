@@ -12,9 +12,8 @@ router.post(
     RoomsController.createRoom,
 )
 router.get('/:hotelId', RoomsController.getAllRoomsOfHotel)
-router.get('/:roomId/detail', RoomsController.getRoom)
 router.get('/:roomId/change-status', RoomsController.changeStatus)
-router.get('/:roomId/promotion', RoomsController.getRoomWithPromotion)
+router.get('/:roomId/detail', RoomsController.getRoom)
 router.put(
     '/:roomId',
     verifyToken,

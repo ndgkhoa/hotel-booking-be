@@ -59,13 +59,12 @@ const ReceiptsController = {
 
             room.status = false
             room.bookedTime = hoursDifference
-            room.bookedLastest = checkOut
+            room.bookedLatest = checkOut
             await room.save()
 
             const newReceipt = new Receipt({
                 method,
                 coupon,
-                date: new Date(),
                 totalCost: parseFloat(totalCostAfterDiscount.toFixed(2)),
                 userId,
             })
