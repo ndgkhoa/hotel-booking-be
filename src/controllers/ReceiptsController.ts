@@ -46,6 +46,7 @@ const ReceiptsController = {
             }
 
             booking.status = true
+            booking.updatedAt = new Date() as any
             let checkOut: any = booking.checkOut
             if (!(checkOut instanceof Date)) {
                 checkOut = new Date(checkOut)

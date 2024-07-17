@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import Hotel from '../models/hotel'
 import User from '../models/user'
 import _ from 'lodash'
+import Account from '../models/account'
 
 const UsersController = {
     getUser: async (req: Request, res: Response) => {
@@ -64,8 +65,18 @@ const UsersController = {
                 return res.status(404).json({ message: 'User not found' })
             }
 
+            const account = await Account.findOneAndUpdate(
+                { userId },
+                { role: 'Role_Supplier' },
+                { new: true },
+            )
+
+            if (!account) {
+                return res.status(404).json({ message: 'Account not found' })
+            }
+
             res.status(200).json({
-                message: 'User has become a supplier successfully',
+                message: 'Has become a supplier successfully',
                 data: user,
             })
         } catch (error) {

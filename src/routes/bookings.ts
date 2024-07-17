@@ -6,6 +6,7 @@ const router = express.Router()
 
 //router.post('/:roomId', BookingsController.bookingWithoutLogin)
 
+router.get('/get-all', BookingsController.getAll)
 router.get('/:bookingId', verifyToken, BookingsController.getBooking)
 router.get('/', verifyToken, BookingsController.getMyBookings)
 router.post('/:roomId', verifyToken, BookingsController.booking)

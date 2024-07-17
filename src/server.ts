@@ -13,6 +13,7 @@ import couponRoutes from './routes/coupons'
 import receiptsRoutes from './routes/receipts'
 import bookingsRoutes from './routes/bookings'
 import bookingDetailsRoutes from './routes/bookingDetails'
+import statisticsRouter from './routes/statistics'
 import cookieParser from 'cookie-parser'
 import cloudinaryConfig from './config/cloudinaryConfig'
 
@@ -41,6 +42,7 @@ app.use('/api/promotions', promotionsRoutes)
 app.use('/api/coupons', couponRoutes)
 app.use('/api/bookings', bookingsRoutes)
 app.use('/api/bookingDetails', bookingDetailsRoutes)
+app.use('/api/statistics', statisticsRouter)
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`)
