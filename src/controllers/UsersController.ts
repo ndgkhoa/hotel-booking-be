@@ -84,6 +84,34 @@ const UsersController = {
             res.status(500).json({ message: 'Something went wrong' })
         }
     },
+
+    changeStatus: async (req: Request, res: Response) => {
+        const userId = req.params.userId
+        try {
+            const user = await User.findById(userId)
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' })
+            }
+
+            user.status = !user.status
+            await user.save()
+
+            if (user.role === 'Role_Supplier') {
+                await Hotel.updateMany(
+                    { supplierId: userId },
+                    { $set: { isActive: false } },
+                )
+            }
+
+            res.status(200).json({
+                message: 'Status updated successfully',
+                data: user,
+            })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
 }
 
 export default UsersController

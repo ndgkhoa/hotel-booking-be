@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import Booking from '../models/booking'
-import BookingDetail from '../models/bookingDetail'
-import { ObjectId } from 'mongodb'
+import Booking from '../models/booking' // Assuming your Mongoose model for bookings
+import BookingDetail from '../models/bookingDetail' // Assuming your Mongoose model for booking details
+import Hotel from '../models/hotel'
 
 const StatisticsController = {
     getTotalCostOfRoom: async (req: Request, res: Response) => {
@@ -107,55 +107,75 @@ const StatisticsController = {
     },
 
     getHotelRevenue: async (req: Request, res: Response) => {
-        const { hotelId } = req.params
+        try {
+            const bookings = await Booking.aggregate([
+                {
+                    $addFields: {
+                        convertedRoomId: { $toObjectId: '$roomId' },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'rooms',
+                        localField: 'convertedRoomId',
+                        foreignField: '_id',
+                        as: 'room',
+                    },
+                },
+                { $unwind: '$room' },
+                {
+                    $addFields: {
+                        convertedHotelId: { $toObjectId: '$room.hotelId' },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'hotels',
+                        localField: 'convertedHotelId',
+                        foreignField: '_id',
+                        as: 'hotel',
+                    },
+                },
+                { $unwind: '$hotel' },
+                {
+                    $project: {
+                        data: {
+                            hotelId: '$hotel._id',
+                            hotelName: '$hotel.name',
+                            year: { $year: '$createdAt' },
+                            month: { $month: '$createdAt' },
+                        },
+                        totalRevenue: '$totalCost',
+                    },
+                },
+                {
+                    $group: {
+                        _id: '$data',
+                        totalRevenue: { $sum: '$totalRevenue' },
+                    },
+                },
+                {
+                    $sort: {
+                        '_id.hotelId': 1,
+                        '_id.year': 1,
+                        '_id.month': 1,
+                    },
+                },
+            ])
 
-        // try {
-        //     console.log(`Fetching revenue for hotelId: ${hotelId}`)
+            const transformedData = bookings.map((item) => ({
+                data: item._id,
+                totalRevenue: item.totalRevenue,
+            }))
 
-        //     const pipeline: any[] = [
-        //         {
-        //             $match: {
-        //                 hotelId: new ObjectId(hotelId),
-        //                 status: true,
-        //             },
-        //         },
-        //         {
-        //             $project: {
-        //                 month: { $month: '$updatedAt' },
-        //                 totalCost: '$totalCost',
-        //             },
-        //         },
-        //         {
-        //             $group: {
-        //                 _id: { month: '$month' },
-        //                 totalRevenue: { $sum: '$totalCost' },
-        //             },
-        //         },
-        //         {
-        //             $sort: { '_id.month': 1 },
-        //         },
-        //     ]
-
-        //     const results = await Booking.aggregate<
-        //         Document & { _id: { month: number }; totalRevenue: number }
-        //     >(pipeline)
-
-        //     const formattedResults = results.map((result) => ({
-        //         month: result._id.month,
-        //         totalRevenue: result.totalRevenue,
-        //     }))
-
-        //     res.status(200).json({
-        //         message: 'Get hotel revenue successfully',
-        //         data: formattedResults,
-        //     })
-        // } catch (error) {
-        //     console.error('Failed to get hotel revenue:', error)
-        //     res.status(500).json({
-        //         message: 'Something went wrong',
-        //     })
-        // }
+            return res.status(200).json(transformedData)
+        } catch (error) {
+            console.error('Error getting hotel revenue:', error)
+            return res.status(500).json({ message: 'Internal server error' })
+        }
     },
+
+    getSuppliersRevenue: async (req: Request, res: Response) => {},
 }
 
 export default StatisticsController

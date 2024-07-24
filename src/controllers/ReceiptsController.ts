@@ -3,12 +3,10 @@ import Receipt from '../models/receipt'
 import Room from '../models/room'
 import BookingDetail from '../models/bookingDetail'
 import Booking from '../models/booking'
-import Coupon from '../models/coupon'
 
 const ReceiptsController = {
     createReceipt: async (req: Request, res: Response) => {
         const { totalCost, method, coupon } = req.body
-        let totalCostAfterDiscount = totalCost
         const userId = req.userId
         const bookingId = req.params.bookingId
 
@@ -24,26 +22,7 @@ const ReceiptsController = {
                 return res.status(404).json({ message: 'Room not found' })
             }
 
-            if (coupon) {
-                const foundCoupon = await Coupon.findOne({
-                    code: coupon,
-                    isActive: true,
-                    expirationDate: { $gte: new Date() },
-                })
-                if (foundCoupon) {
-                    if (foundCoupon.type === 'percentage') {
-                        totalCostAfterDiscount =
-                            totalCost - (totalCost * foundCoupon.value) / 100
-                    } else if (foundCoupon.type === 'fixed') {
-                        totalCostAfterDiscount = totalCost - foundCoupon.value
-                    }
-                    totalCostAfterDiscount = Math.max(totalCostAfterDiscount, 0)
-                } else {
-                    return res
-                        .status(400)
-                        .json({ message: 'Invalid or expired coupon' })
-                }
-            }
+            
 
             booking.status = true
             booking.updatedAt = new Date() as any
@@ -60,13 +39,13 @@ const ReceiptsController = {
             const newReceipt = new Receipt({
                 method,
                 coupon,
-                totalCost: parseFloat(totalCostAfterDiscount.toFixed(2)),
+                totalCost,
                 userId,
             })
             await newReceipt.save()
 
             const newBookingDetail = new BookingDetail({
-                totalCost: totalCostAfterDiscount,
+                totalCost,
                 roomId,
                 receiptId: newReceipt._id,
                 bookingId,

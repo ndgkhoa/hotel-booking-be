@@ -8,13 +8,6 @@ import User from '../models/user'
 const AuthController = {
     register: async (req: Request, res: Response) => {
         try {
-            let existingUser = await User.findOne({
-                username: req.body.username,
-            })
-            if (existingUser) {
-                return res.status(400).json({ message: 'User already exists' })
-            }
-
             let existingAccount = await Account.findOne({
                 username: req.body.username,
             })
@@ -32,6 +25,7 @@ const AuthController = {
                 email: req.body.email,
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
+                status: true,
             })
             await newUser.save()
 
@@ -58,6 +52,11 @@ const AuthController = {
             const account = await Account.findOne({ username })
             if (!account) {
                 return res.status(400).json({ message: 'Invalid Credentials' })
+            }
+            const userId = account.userId
+            const user = await User.findOne({ _id: userId })
+            if (!user?.status) {
+                return res.status(403).json({ message: 'Account not active' })
             }
             const isMatch = await comparePasswords(password, account.password)
             if (!isMatch) {

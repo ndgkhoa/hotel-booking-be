@@ -32,7 +32,7 @@ const RoomsController = {
                 imageUrls,
                 bookedTime: 0,
                 bookedLatest: null,
-                discountRate: 1,
+                discountRate: 0,
             })
 
             await newRoom.save()
@@ -65,7 +65,7 @@ const RoomsController = {
     getAllRoomsOfHotel: async (req: Request, res: Response) => {
         try {
             const hotelId = req.params.hotelId
-            const rooms = await Room.find({ hotelId }).lean()
+            const rooms = await Room.find({ hotelId })
 
             if (rooms.length === 0) {
                 return res
@@ -95,7 +95,7 @@ const RoomsController = {
             }
 
             const roomsWithFinalPrice = rooms.map((room) => {
-                let discountRate = 1
+                let discountRate = 0
                 let finalPrice = room.pricePerNight
 
                 if (maxDiscountPromotion) {

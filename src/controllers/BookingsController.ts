@@ -8,11 +8,21 @@ import { sendBookingConfirmation } from '../utils/mailer'
 const BookingsController = {
     booking: async (req: Request, res: Response) => {
         const { checkIn, checkOut, adultCount, childCount } = req.body
+
         const roomId = req.params.roomId
         const userId = req.userId
-        if (!checkIn || !checkOut || !adultCount || !childCount) {
+
+        if (
+            !checkIn ||
+            !checkOut ||
+            adultCount === undefined ||
+            childCount === undefined ||
+            !roomId ||
+            !userId
+        ) {
             return res.status(400).json({ message: 'Missing required fields' })
         }
+
         try {
             const room = await Room.findById(roomId)
             if (!room) {
@@ -25,15 +35,15 @@ const BookingsController = {
                 checkOutDate.getTime() - checkInDate.getTime()
             const numberOfNights = timeDifference / (1000 * 3600 * 24)
 
-            const totalCost = parseFloat(
-                (room.pricePerNight * numberOfNights).toFixed(2),
-            )
-
             if (numberOfNights <= 0) {
                 return res
                     .status(400)
                     .json({ message: 'Invalid check-in or check-out dates' })
             }
+
+            const totalCost = parseFloat(
+                (room.pricePerNight * numberOfNights).toFixed(2),
+            )
 
             const newBooking = new Booking({
                 checkIn,
@@ -47,7 +57,7 @@ const BookingsController = {
             })
             await newBooking.save()
 
-            const user = await User.findById({ _id: userId })
+            const user = await User.findById(userId)
             if (user) {
                 await sendBookingConfirmation(user.email, {
                     checkIn,
@@ -56,7 +66,7 @@ const BookingsController = {
                     childCount,
                     totalCost,
                     bookingDate: newBooking.createdAt as unknown as Date,
-                    userName: user.firstName + ' ' + user.lastName,
+                    userName: `${user.firstName} ${user.lastName}`,
                 })
             }
 

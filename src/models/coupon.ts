@@ -3,6 +3,7 @@ import { CouponType } from '../shared/types'
 
 const couponSchema = new mongoose.Schema<CouponType>(
     {
+        supplierId: { type: String, required: true },
         code: { type: String, required: true, unique: true },
         type: { type: String, required: true, enum: ['percentage', 'fixed'] },
         value: { type: Number, required: true },

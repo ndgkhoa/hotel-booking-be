@@ -17,6 +17,7 @@ export type UserType = {
     email: string
     firstName: string
     lastName: string
+    status:boolean
 }
 
 export type CategoryType = {
@@ -26,7 +27,7 @@ export type CategoryType = {
 
 export type HotelType = {
     _id: string
-    userId: string
+    supplierId: string
     name: string
     city: string
     country: string
@@ -83,9 +84,17 @@ export type BookingDetailType = {
 }
 
 export type CouponType = {
+    supplierId: string
     code: string
     type: 'percentage' | 'fixed'
     value: number
     expirationDate: Date
     isActive: boolean
+}
+
+export type CommentType = {
+    hotelId: string
+    userId: string
+    content: string
+    status: boolean
 }

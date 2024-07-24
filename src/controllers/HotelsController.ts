@@ -18,7 +18,7 @@ const HotelsController = {
 
             const imageUrls = await uploadImages(imageFiles)
             newHotel.imageUrls = imageUrls
-            newHotel.userId = req.userId
+            newHotel.supplierId = req.userId
             newHotel.status = true
 
             const hotel = new Hotel(newHotel)
@@ -64,9 +64,9 @@ const HotelsController = {
         }
     },
 
-    getAllHotelsOfAuthor: async (req: Request, res: Response) => {
+    getAllHotelsOfSupplier: async (req: Request, res: Response) => {
         try {
-            const hotels = await Hotel.find({ userId: req.userId })
+            const hotels = await Hotel.find({ supplierId: req.userId })
             res.status(200).json({
                 message: 'Get data successfully',
                 data: hotels,
@@ -82,7 +82,7 @@ const HotelsController = {
             const hotel = await Hotel.findByIdAndUpdate(
                 {
                     _id: req.params.hotelId,
-                    userId: req.userId,
+                    supplierId: req.userId,
                 },
                 updatedHotel,
                 { new: true },
