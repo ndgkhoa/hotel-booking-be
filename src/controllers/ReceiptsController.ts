@@ -97,6 +97,27 @@ const ReceiptsController = {
             res.status(500).json({ message: 'Something went wrong', error })
         }
     },
+
+    getReceiptsByUserId: async (req: Request, res: Response) => {
+        const userId = req.userId
+        try {
+            const receipts = await Receipt.find({ userId }).lean()
+
+            if (receipts.length === 0) {
+                return res
+                    .status(404)
+                    .json({ message: 'No receipts found for this user' })
+            }
+
+            return res.status(200).json({
+                message: 'Get data successfully',
+                data: receipts,
+            })
+        } catch (error) {
+            console.error('Error fetching receipts:', error)
+            throw new Error('Error fetching receipts')
+        }
+    },
 }
 
 export default ReceiptsController

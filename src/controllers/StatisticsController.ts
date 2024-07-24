@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
-import Booking from '../models/booking' // Assuming your Mongoose model for bookings
-import BookingDetail from '../models/bookingDetail' // Assuming your Mongoose model for booking details
+import Booking from '../models/booking'
+import BookingDetail from '../models/bookingDetail'
 import Hotel from '../models/hotel'
+import Room from '../models/room'
 
 const StatisticsController = {
     getTotalCostOfRoom: async (req: Request, res: Response) => {
@@ -175,7 +176,72 @@ const StatisticsController = {
         }
     },
 
-    getSuppliersRevenue: async (req: Request, res: Response) => {},
+    getSuppliersRevenue: async (req: Request, res: Response) => {
+        try {
+            const supplierId = req.userId
+
+            if (!supplierId) {
+                return res
+                    .status(400)
+                    .json({ message: 'Supplier ID is required' })
+            }
+
+            const hotels = await Hotel.find({ supplierId })
+
+            if (hotels.length === 0) {
+                return res
+                    .status(404)
+                    .json({ message: 'No hotels found for this supplier' })
+            }
+
+            const hotelIds = hotels.map((hotel) => hotel._id)
+
+            const rooms = await Room.find({ hotelId: { $in: hotelIds } })
+
+            if (rooms.length === 0) {
+                return res
+                    .status(404)
+                    .json({ message: 'No rooms found for these hotels' })
+            }
+
+            const monthlyRevenue = await BookingDetail.aggregate([
+                {
+                    $addFields: {
+                        receiptObjectId: { $toObjectId: '$receiptId' },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'receipts',
+                        localField: 'receiptObjectId',
+                        foreignField: '_id',
+                        as: 'receipt',
+                    },
+                },
+                { $unwind: '$receipt' },
+                {
+                    $group: {
+                        _id: {
+                            year: { $year: '$receipt.createdAt' },
+                            month: { $month: '$receipt.createdAt' },
+                        },
+                        totalRevenue: { $sum: '$totalCost' },
+                    },
+                },
+                {
+                    $sort: { '_id.year': 1, '_id.month': 1 },
+                },
+            ])
+
+            res.status(200).json({
+                message: 'Get monthly revenue successfully',
+                data: monthlyRevenue,
+            })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
 }
 
 export default StatisticsController
