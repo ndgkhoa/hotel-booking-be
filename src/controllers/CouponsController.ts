@@ -61,8 +61,13 @@ const CouponsController = {
     useCoupon: async (req: Request, res: Response) => {
         const { coupon, totalCost } = req.body
         const bookingId = req.params.bookingId
+
         try {
-            if (!coupon || totalCost === undefined) {
+            if (!coupon) {
+                return res.json({ data: totalCost })
+            }
+
+            if (totalCost === undefined) {
                 return res.status(400).json({
                     message: 'Coupon code and total cost are required',
                 })
@@ -96,12 +101,10 @@ const CouponsController = {
             }
 
             if (foundCoupon.supplierId !== foundHotel.supplierId) {
-                return res
-                    .status(400)
-                    .json({
-                        message: 'Coupon is not applicable to this hotel',
-                        data: [foundCoupon.supplierId, foundHotel.supplierId],
-                    })
+                return res.status(400).json({
+                    message: 'Coupon is not applicable to this hotel',
+                    data: [foundCoupon.supplierId, foundHotel.supplierId],
+                })
             }
 
             let totalCostAfterDiscount = totalCost
