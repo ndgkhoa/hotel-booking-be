@@ -65,7 +65,7 @@ const RoomsController = {
     getAllRoomsOfHotel: async (req: Request, res: Response) => {
         try {
             const hotelId = req.params.hotelId
-            const rooms = await Room.find({ hotelId })
+            const rooms = await Room.find({ hotelId }).lean()
 
             if (rooms.length === 0) {
                 return res
