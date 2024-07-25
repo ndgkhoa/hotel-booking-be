@@ -42,4 +42,24 @@ Your Hotel Team`,
     return transporter.sendMail(mailOptions)
 }
 
-export { sendBookingConfirmation, BookingInfo }
+const sendConfirmationCode = (to: string, code: string) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to,
+        subject: 'Supplier Registration Confirmation',
+        text: `Dear User,
+
+To complete your registration as a supplier, please use the following confirmation code:
+
+Code: ${code}
+
+Thank you for your patience!
+
+Best regards,
+Your Hotel Team`,
+    }
+
+    return transporter.sendMail(mailOptions)
+}
+
+export { sendBookingConfirmation, BookingInfo, sendConfirmationCode }

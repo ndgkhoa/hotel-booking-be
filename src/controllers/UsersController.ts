@@ -2,6 +2,9 @@ import { Request, Response } from 'express'
 import Hotel from '../models/hotel'
 import User from '../models/user'
 import _ from 'lodash'
+import crypto from 'crypto'
+import { sendConfirmationCode } from '../utils/mailer'
+import SupplierConfirmation from '../models/supplierConfirmation'
 import Account from '../models/account'
 
 const UsersController = {
@@ -55,29 +58,75 @@ const UsersController = {
     becomeSupplier: async (req: Request, res: Response) => {
         const userId = req.userId
         try {
-            const user = await User.findByIdAndUpdate(
-                userId,
-                { role: 'Role_Supplier' },
-                { new: true },
-            )
+            const user = await User.findById(userId)
 
             if (!user) {
                 return res.status(404).json({ message: 'User not found' })
             }
 
-            const account = await Account.findOneAndUpdate(
+            const confirmationCode = crypto.randomBytes(4).toString('hex')
+
+            await SupplierConfirmation.create({
+                userId,
+                code: confirmationCode,
+            })
+
+            await sendConfirmationCode(
+                'user.iamjasper@gmail.com',
+                confirmationCode,
+            )
+
+            res.status(200).json({
+                message:
+                    'Confirmation code sent to your email. Please check your email to complete the supplier registration.',
+            })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    verifySupplierCode: async (req: Request, res: Response) => {
+        const { code } = req.body
+        const userId = req.userId
+
+        try {
+            const confirmation = await SupplierConfirmation.findOne({
+                userId,
+                code,
+            })
+
+            if (!confirmation) {
+                return res
+                    .status(400)
+                    .json({ message: 'Invalid or expired confirmation code' })
+            }
+
+            await SupplierConfirmation.deleteOne({ userId, code })
+
+            const updatedUser = await User.findByIdAndUpdate(
+                userId,
+                { role: 'Role_Supplier' },
+                { new: true },
+            )
+
+            if (!updatedUser) {
+                return res.status(404).json({ message: 'User not found' })
+            }
+
+            const updatedAccount = await Account.findOneAndUpdate(
                 { userId },
                 { role: 'Role_Supplier' },
                 { new: true },
             )
 
-            if (!account) {
+            if (!updatedAccount) {
                 return res.status(404).json({ message: 'Account not found' })
             }
 
             res.status(200).json({
-                message: 'Has become a supplier successfully',
-                data: user,
+                message: 'You have successfully become a supplier.',
+                data: updatedUser,
             })
         } catch (error) {
             console.error(error)

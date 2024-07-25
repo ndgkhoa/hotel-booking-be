@@ -125,7 +125,7 @@ const AuthController = {
     },
 
     logout: async (req: Request, res: Response) => {
-        res.setHeader('Authorization', '') // Xóa Authorization header
+        res.setHeader('Authorization', '')
         res.status(200).send({ message: 'Logged out successfully' })
     },
 }

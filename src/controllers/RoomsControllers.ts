@@ -19,6 +19,13 @@ const RoomsController = {
             const { name, facilities, adultCount, childCount, pricePerNight } =
                 req.body
 
+            const existingRoom = await Room.findOne({ name: req.body.name })
+            if (existingRoom) {
+                return res
+                    .status(400)
+                    .json({ message: 'Room name already exists' })
+            }
+
             const imageUrls = await uploadImages(imageFiles)
 
             const newRoom = new Room({

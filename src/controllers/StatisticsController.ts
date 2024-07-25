@@ -3,6 +3,7 @@ import Booking from '../models/booking'
 import BookingDetail from '../models/bookingDetail'
 import Hotel from '../models/hotel'
 import Room from '../models/room'
+import Receipt from '../models/receipt'
 
 const StatisticsController = {
     getTotalCostOfRoom: async (req: Request, res: Response) => {
@@ -55,52 +56,80 @@ const StatisticsController = {
         }
     },
 
-    getMonthlyRevenue: async (req: Request, res: Response) => {
+    getRoomRevenueOfSupplier: async (req: Request, res: Response) => {
         try {
-            const revenues = await Booking.aggregate([
-                {
-                    $match: {
-                        updatedAt: { $exists: true },
-                        status: true,
-                    },
-                },
-                {
-                    $group: {
-                        _id: {
-                            roomId: '$roomId',
-                            year: { $year: '$updatedAt' },
-                            month: { $month: '$updatedAt' },
-                        },
-                        monthlyRevenue: { $sum: '$totalCost' },
-                    },
-                },
-                {
-                    $group: {
-                        _id: '$_id.roomId',
-                        monthlyRevenues: {
-                            $push: {
-                                month: '$_id.month',
-                                year: '$_id.year',
-                                revenue: '$monthlyRevenue',
-                            },
-                        },
-                    },
-                },
-                {
-                    $project: {
-                        roomId: '$_id',
-                        monthlyRevenues: 1,
-                        _id: 0,
-                    },
-                },
-            ])
+            const supplierId = req.userId
+
+            const hotels = await Hotel.find({ supplierId }).lean()
+            if (hotels.length === 0) {
+                return res
+                    .status(404)
+                    .json({ message: 'No hotels found for this supplier' })
+            }
+
+            const hotelIds = hotels.map((hotel) => hotel._id)
+
+            const rooms = await Room.find({ hotelId: { $in: hotelIds } }).lean()
+            if (rooms.length === 0) {
+                return res
+                    .status(404)
+                    .json({ message: 'No rooms found for these hotels' })
+            }
+
+            const roomIds = rooms.map((room) => room._id)
+
+            const bookingDetails = await BookingDetail.find({
+                roomId: { $in: roomIds },
+            }).lean()
+            if (bookingDetails.length === 0) {
+                return res
+                    .status(404)
+                    .json({
+                        message: 'No booking details found for these rooms',
+                    })
+            }
+
+            const receiptIds = bookingDetails.map((detail) => detail.receiptId)
+
+            const receipts = await Receipt.find({
+                _id: { $in: receiptIds },
+            }).lean()
+            if (receipts.length === 0) {
+                return res
+                    .status(404)
+                    .json({
+                        message: 'No receipts found for these booking details',
+                    })
+            }
+
+            const revenueMap: Record<string, number> = {}
+
+            bookingDetails.forEach((detail) => {
+                const receipt = receipts.find(
+                    (r) => r._id.toString() === detail.receiptId,
+                )
+                if (receipt) {
+                    if (!revenueMap[detail.roomId]) {
+                        revenueMap[detail.roomId] = 0
+                    }
+                    revenueMap[detail.roomId] += receipt.totalCost
+                }
+            })
+
+            const roomRevenues = rooms.map((room) => ({
+                roomId: room._id,
+                name: room.name,
+                revenue: revenueMap[room._id.toString()] || 0,
+            }))
+
+            console.log('Room Revenues:', roomRevenues)
 
             res.status(200).json({
                 message: 'Get data successfully',
-                data: revenues,
+                data: roomRevenues,
             })
         } catch (error) {
-            console.error(error)
+            console.error('Error fetching room revenue:', error)
             res.status(500).json({
                 message: 'Something went wrong',
             })
