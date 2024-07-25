@@ -38,7 +38,7 @@ const RoomsController = {
                 pricePerNight,
                 imageUrls,
                 bookedTime: 0,
-                bookedLatest: null,
+                bookedLatest: new Date(),
                 discountRate: 0,
             })
 

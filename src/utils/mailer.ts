@@ -42,21 +42,22 @@ Your Hotel Team`,
     return transporter.sendMail(mailOptions)
 }
 
-const sendConfirmationCode = (to: string, code: string) => {
+const sendConfirmationCode = (
+    to: string,
+    code: string,
+): Promise<nodemailer.SentMessageInfo> => {
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to,
         subject: 'Supplier Registration Confirmation',
-        text: `Dear User,
-
-To complete your registration as a supplier, please use the following confirmation code:
-
-Code: ${code}
-
-Thank you for your patience!
-
-Best regards,
-Your Hotel Team`,
+        html: `
+            <p>Dear User,</p>
+            <p>To complete your registration as a supplier, please use the following confirmation code:</p>
+            <p style="font-weight: bold; font-size: 20px;">${code}</p>
+            <p>Thank you for your patience!</p>
+            <p>Best regards,</p>
+            <p>Your Hotel Team</p>
+        `,
     }
 
     return transporter.sendMail(mailOptions)

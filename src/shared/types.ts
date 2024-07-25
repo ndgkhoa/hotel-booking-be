@@ -46,7 +46,7 @@ export type RoomType = {
     adultCount: number
     childCount: number
     bookedTime: number
-    bookedLatest: Date | null
+    bookedLatest: Date
     facilities: string[]
     pricePerNight: number
     imageUrls: string[]
