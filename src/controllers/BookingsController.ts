@@ -77,6 +77,8 @@ const BookingsController = {
         }
     },
 
+    bookingWithoutLogin: async (req: Request, res: Response) => {},
+
     getBooking: async (req: Request, res: Response) => {
         const bookingId = req.params.bookingId
         try {

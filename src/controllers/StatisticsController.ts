@@ -31,7 +31,24 @@ const StatisticsController = {
 
     getBookingDetailCountByRoom: async (req: Request, res: Response) => {
         try {
+            const supplierId = req.userId
+
+            const hotels = await Hotel.find({ supplierId: supplierId })
+                .select('_id')
+                .exec()
+            const hotelIds = hotels.map((hotel) => hotel._id.toString())
+
+            const rooms = await Room.find({ hotelId: { $in: hotelIds } })
+                .select('_id')
+                .exec()
+            const roomIds = rooms.map((room) => room._id.toString())
+
             const roomBookingCounts = await BookingDetail.aggregate([
+                {
+                    $match: {
+                        roomId: { $in: roomIds },
+                    },
+                },
                 {
                     $group: {
                         _id: '$roomId',
@@ -46,6 +63,7 @@ const StatisticsController = {
                     },
                 },
             ])
+
             res.status(200).json({
                 message: 'Room booking counts retrieved successfully',
                 data: roomBookingCounts,
@@ -82,11 +100,9 @@ const StatisticsController = {
                 roomId: { $in: roomIds },
             }).lean()
             if (bookingDetails.length === 0) {
-                return res
-                    .status(404)
-                    .json({
-                        message: 'No booking details found for these rooms',
-                    })
+                return res.status(404).json({
+                    message: 'No booking details found for these rooms',
+                })
             }
 
             const receiptIds = bookingDetails.map((detail) => detail.receiptId)
@@ -95,11 +111,9 @@ const StatisticsController = {
                 _id: { $in: receiptIds },
             }).lean()
             if (receipts.length === 0) {
-                return res
-                    .status(404)
-                    .json({
-                        message: 'No receipts found for these booking details',
-                    })
+                return res.status(404).json({
+                    message: 'No receipts found for these booking details',
+                })
             }
 
             const revenueMap: Record<string, number> = {}
@@ -122,8 +136,6 @@ const StatisticsController = {
                 revenue: revenueMap[room._id.toString()] || 0,
             }))
 
-            console.log('Room Revenues:', roomRevenues)
-
             res.status(200).json({
                 message: 'Get data successfully',
                 data: roomRevenues,
@@ -138,6 +150,23 @@ const StatisticsController = {
 
     getHotelRevenue: async (req: Request, res: Response) => {
         try {
+            const supplierId = req.userId 
+            if (!supplierId) {
+                return res
+                    .status(400)
+                    .json({ message: 'Supplier ID is required' })
+            }
+
+            const hotels = await Hotel.find({ supplierId })
+
+            if (hotels.length === 0) {
+                return res
+                    .status(404)
+                    .json({ message: 'No hotels found for this supplier' })
+            }
+
+            const hotelIds = hotels.map((hotel) => hotel._id)
+
             const bookings = await Booking.aggregate([
                 {
                     $addFields: {
@@ -167,6 +196,11 @@ const StatisticsController = {
                     },
                 },
                 { $unwind: '$hotel' },
+                {
+                    $match: {
+                        'hotel._id': { $in: hotelIds },
+                    },
+                },
                 {
                     $project: {
                         data: {
@@ -198,7 +232,10 @@ const StatisticsController = {
                 totalRevenue: item.totalRevenue,
             }))
 
-            return res.status(200).json(transformedData)
+            return res.status(200).json({
+                message: 'Get hotel revenue successfully',
+                data: transformedData,
+            })
         } catch (error) {
             console.error('Error getting hotel revenue:', error)
             return res.status(500).json({ message: 'Internal server error' })
@@ -259,6 +296,16 @@ const StatisticsController = {
                 },
                 {
                     $sort: { '_id.year': 1, '_id.month': 1 },
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        time: {
+                            year: '$_id.year',
+                            month: '$_id.month',
+                        },
+                        totalRevenue: 1,
+                    },
                 },
             ])
 
