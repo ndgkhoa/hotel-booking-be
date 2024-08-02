@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import cloudinary from 'cloudinary'
 import { HotelType } from '../shared/types'
 import Hotel from '../models/hotel'
-import { validationResult } from 'express-validator'
+import Room from '../models/room'
 
 const HotelsController = {
     createHotel: async (req: Request, res: Response) => {
@@ -47,13 +47,12 @@ const HotelsController = {
     },
 
     getHotel: async (req: Request, res: Response) => {
-        const errors = validationResult(req)
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() })
-        }
         const hotelId = req.params.hotelId
         try {
             const hotel = await Hotel.findById(hotelId)
+            if (!hotel) {
+                return res.status(404).json({ message: 'Hotel not found' })
+            }
             res.status(200).json({
                 message: 'Get data successfully',
                 data: hotel,
@@ -108,10 +107,13 @@ const HotelsController = {
 
     changeStatus: async (req: Request, res: Response) => {
         const hotelId = req.params.hotelId
-        const hotel = await Hotel.findById({ _id: hotelId })
-        if (!hotel) return res.status(500).json({ message: 'Hotel not found' })
+        const hotel = await Hotel.findById({ hotelId })
+        if (!hotel) return res.status(404).json({ message: 'Hotel not found' })
         hotel.status = !hotel.status
-        hotel.save()
+        await hotel.save()
+        if (!hotel.status) {
+            await Room.updateMany({ hotelId: hotelId }, { status: false })
+        }
         return res
             .status(200)
             .json({ message: 'Status updated successfully', data: hotel })

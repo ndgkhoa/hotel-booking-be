@@ -14,5 +14,16 @@ router.get(
     verifyToken,
     BookingsController.getHotelFromBookingId,
 )
+router.put(
+    '/:bookingId/pending-cancel',
+    verifyToken,
+    BookingsController.cancelPendingBooking,
+)
+router.put(
+    '/:bookingId/paid-cancel',
+    verifyToken,
+    BookingsController.cancelPaidBooking,
+)
+router.put('/auto-cancel', verifyToken, BookingsController.autoCancel)
 
 export default router

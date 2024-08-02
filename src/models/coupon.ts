@@ -5,7 +5,12 @@ const couponSchema = new mongoose.Schema<CouponType>(
     {
         supplierId: { type: String, required: true },
         code: { type: String, required: true, unique: true },
-        type: { type: String, required: true, enum: ['percentage', 'fixed'] },
+        type: {
+            type: String,
+            required: true,
+            enum: ['percentage', 'fixed'],
+            default: 'fixed',
+        },
         value: { type: Number, required: true },
         expirationDate: { type: Date, required: true },
         isActive: { type: Boolean, default: true },

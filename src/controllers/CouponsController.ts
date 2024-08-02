@@ -7,7 +7,7 @@ import Hotel from '../models/hotel'
 
 const CouponsController = {
     createCoupon: async (req: Request, res: Response) => {
-        const { code, type, value, expirationDate } = req.body
+        const { code, value, expirationDate } = req.body
         const supplierId = req.userId
         try {
             const supplier = await User.find({ supplierId })
@@ -24,7 +24,6 @@ const CouponsController = {
             const newCoupon = new Coupon({
                 supplierId,
                 code,
-                type,
                 value,
                 expirationDate,
             })
@@ -58,7 +57,7 @@ const CouponsController = {
         }
     },
 
-    useCoupon: async (req: Request, res: Response) => {
+    useHotelCoupon: async (req: Request, res: Response) => {
         const { coupon, totalCost } = req.body
         const bookingId = req.params.bookingId
 
@@ -69,7 +68,7 @@ const CouponsController = {
 
             if (totalCost === undefined) {
                 return res.status(400).json({
-                    message: 'Coupon code and total cost are required',
+                    message: 'Total cost are required',
                 })
             }
 
@@ -100,18 +99,17 @@ const CouponsController = {
                 return res.status(404).json({ message: 'Hotel not found' })
             }
 
-            if (foundCoupon.supplierId !== foundHotel.supplierId) {
-                return res.status(400).json({
-                    message: 'Coupon is not applicable to this hotel',
-                    data: [foundCoupon.supplierId, foundHotel.supplierId],
-                })
-            }
-
             let totalCostAfterDiscount = totalCost
 
-            if (foundCoupon.type === 'percentage') {
+            if (foundCoupon.supplierId === 'admin') {
                 totalCostAfterDiscount -= (totalCost * foundCoupon.value) / 100
-            } else if (foundCoupon.type === 'fixed') {
+            } else {
+                if (foundCoupon.supplierId !== foundHotel.supplierId) {
+                    return res.status(400).json({
+                        message: 'Coupon is not applicable to this hotel',
+                        data: [foundCoupon.supplierId, foundHotel.supplierId],
+                    })
+                }
                 totalCostAfterDiscount -= foundCoupon.value
             }
 
@@ -121,6 +119,24 @@ const CouponsController = {
         } catch (error) {
             console.error('Error applying coupon:', error)
             res.status(500).json({ message: 'Internal server error' })
+        }
+    },
+
+    changeStatus: async (req: Request, res: Response) => {
+        const couponId = req.params.couponId
+        try {
+            const coupon = await Coupon.findById(couponId)
+            if (!coupon) {
+                return res.status(404).json({ message: 'Coupon not found' })
+            }
+            coupon.isActive = !coupon.isActive
+            await coupon.save()
+            return res
+                .status(200)
+                .json({ message: 'Status updated successfully', data: coupon })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
         }
     },
 }

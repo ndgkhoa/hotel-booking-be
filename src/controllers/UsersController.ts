@@ -2,10 +2,10 @@ import { Request, Response } from 'express'
 import Hotel from '../models/hotel'
 import User from '../models/user'
 import _ from 'lodash'
-import crypto from 'crypto'
 import { sendConfirmationCode } from '../utils/mailer'
 import SupplierConfirmation from '../models/supplierConfirmation'
 import Account from '../models/account'
+import { generateRandomCode } from '../utils/randomCodeUtils'
 
 const UsersController = {
     getUser: async (req: Request, res: Response) => {
@@ -64,17 +64,14 @@ const UsersController = {
                 return res.status(404).json({ message: 'User not found' })
             }
 
-            const confirmationCode = crypto.randomBytes(4).toString('hex')
+            const confirmationCode = generateRandomCode(8)
 
             await SupplierConfirmation.create({
                 userId,
                 code: confirmationCode,
             })
 
-            await sendConfirmationCode(
-                'user.iamjasper@gmail.com',
-                confirmationCode,
-            )
+            await sendConfirmationCode(user.email, confirmationCode)
 
             res.status(200).json({
                 message:
@@ -100,6 +97,18 @@ const UsersController = {
                 return res
                     .status(400)
                     .json({ message: 'Invalid or expired confirmation code' })
+            }
+
+            const expirationTime = new Date(confirmation.createdAt)
+            expirationTime.setMinutes(expirationTime.getMinutes() + 10)
+
+            const currentTime = new Date()
+
+            if (expirationTime < currentTime) {
+                await SupplierConfirmation.deleteOne({ userId, code })
+                return res
+                    .status(400)
+                    .json({ message: 'The confirmation code has expired.' })
             }
 
             await SupplierConfirmation.deleteOne({ userId, code })

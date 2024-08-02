@@ -4,6 +4,8 @@ import Hotel from '../models/hotel'
 import Room from '../models/room'
 import User from '../models/user'
 import { sendBookingConfirmation } from '../utils/mailer'
+import Coupon from '../models/coupon'
+import { generateRandomCode } from '../utils/randomCodeUtils'
 
 const BookingsController = {
     booking: async (req: Request, res: Response) => {
@@ -48,7 +50,6 @@ const BookingsController = {
             const newBooking = new Booking({
                 checkIn,
                 checkOut,
-                status: false,
                 adultCount,
                 childCount,
                 totalCost,
@@ -143,6 +144,138 @@ const BookingsController = {
             res.status(200).json({
                 message: 'Get data successfully',
                 data: hotel,
+            })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    cancelPendingBooking: async (req: Request, res: Response) => {
+        const bookingId = req.params.bookingId
+        try {
+            const booking = await Booking.findById(bookingId)
+
+            if (!booking) {
+                return res.status(404).json({ message: 'Booking not found' })
+            }
+
+            if (booking.status !== 'pending') {
+                return res
+                    .status(400)
+                    .json({ message: 'Booking is not pending status' })
+            }
+            booking.status = 'canceled'
+
+            await booking.save()
+            res.status(200).json({
+                message: 'Booking canceled successfully',
+                data: booking,
+            })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    cancelPaidBooking: async (req: Request, res: Response) => {
+        const bookingId = req.params.bookingId
+        try {
+            const booking = await Booking.findById(bookingId)
+
+            if (!booking) {
+                return res.status(404).json({ message: 'Booking not found' })
+            }
+
+            if (booking.status !== 'paid') {
+                return res
+                    .status(400)
+                    .json({ message: 'Booking is not paid status' })
+            }
+
+            let newCoupon
+            if (booking.createdAt instanceof Date) {
+                const currentTime = new Date()
+                const expirationDate = new Date(currentTime)
+                expirationDate.setMonth(currentTime.getMonth() + 1)
+                const timeDifference =
+                    currentTime.getTime() - booking.createdAt.getTime()
+                const hoursDifference = Math.ceil(
+                    timeDifference / (1000 * 60 * 60),
+                )
+                const randomCode = generateRandomCode(6)
+
+                if (hoursDifference >= 48) {
+                    newCoupon = new Coupon({
+                        supplierId: 'admin',
+                        code: randomCode,
+                        type: 'percentage',
+                        value: 85,
+                        expirationDate: expirationDate,
+                    })
+                } else if (hoursDifference >= 24) {
+                    newCoupon = new Coupon({
+                        supplierId: 'admin',
+                        code: randomCode,
+                        type: 'percentage',
+                        value: 50,
+                        expirationDate: expirationDate,
+                    })
+                } else
+                    return res
+                        .status(400)
+                        .json({ message: 'You can not cancel this booking' })
+
+                booking.status = 'canceled'
+
+                await newCoupon.save()
+                await booking.save()
+            }
+
+            res.status(200).json({
+                message: 'Booking canceled successfully',
+                data: {
+                    booking,
+                    newCoupon,
+                },
+            })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    autoCancel: async (req: Request, res: Response) => {
+        const userId = req.userId
+        try {
+            const bookings = await Booking.find({ userId })
+
+            if (bookings.length === 0) {
+                return res.status(404).json({ message: 'No booking found' })
+            }
+
+            const updatePromises = bookings.map(async (booking) => {
+                if (
+                    booking.status === 'pending' &&
+                    booking.createdAt instanceof Date
+                ) {
+                    const nowDate = new Date()
+                    const timeDifference =
+                        nowDate.getTime() - booking.createdAt.getTime()
+                    const numberOfDays = timeDifference / (1000 * 3600 * 24)
+
+                    if (numberOfDays >= 3) {
+                        booking.status = 'canceled'
+                        await booking.save()
+                    }
+                }
+            })
+
+            await Promise.all(updatePromises)
+
+            res.status(200).json({
+                message: 'Auto cancel successfully',
+                data: bookings,
             })
         } catch (error) {
             console.error(error)

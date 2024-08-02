@@ -24,11 +24,7 @@ router.get(
     isSupplier,
     HotelsController.getAllHotelsOfSupplier,
 )
-router.get(
-    '/:hotelId',
-    [param('hotelId').notEmpty().withMessage('Hotel Id is required')],
-    HotelsController.getHotel,
-)
+router.get('/:hotelId', HotelsController.getHotel)
 router.put(
     '/:hotelId',
     verifyToken,

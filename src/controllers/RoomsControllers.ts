@@ -102,7 +102,7 @@ const RoomsController = {
             }
 
             const roomsWithFinalPrice = rooms.map((room) => {
-                let discountRate = 0
+                let discountRate = 0.1
                 let finalPrice = room.pricePerNight
 
                 if (maxDiscountPromotion) {
@@ -178,7 +178,7 @@ const RoomsController = {
 
             const currentTime = new Date()
             for (const room of rooms) {
-                if (room.bookedLatest) {
+                if (room.bookedLatest&&room.status===false) {
                     const bookedLastest = new Date(room.bookedLatest as any)
                     const timeDifference =
                         bookedLastest.getTime() - currentTime.getTime()

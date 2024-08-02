@@ -6,15 +6,18 @@ const CommentsController = {
     createComment: async (req: Request, res: Response) => {
         const userId = req.userId
         const hotelId = req.params.hotelId
-        const { content } = req.body
-        if (!content) {
-            return res.status(400).json({ message: 'Content is required' })
+        const { content, rating } = req.body
+        if (!content || !rating) {
+            return res
+                .status(400)
+                .json({ message: 'Content and rating are required' })
         }
         try {
             const newComment = new Comment({
                 userId,
                 hotelId,
                 content,
+                rating,
             })
             await newComment.save()
             res.status(201).json({
@@ -29,14 +32,25 @@ const CommentsController = {
     getAllCommentsOfHotel: async (req: Request, res: Response) => {
         const hotelId = req.params.hotelId
         try {
-            const hotel = await Hotel.findById({ _id: hotelId })
+            const hotel = await Hotel.findById({ _id: hotelId }).lean()
             if (!hotel) {
                 return res.status(404).json({ message: 'Hotel not found' })
             }
-            const comments = await Comment.find({ hotelId })
+            const comments = await Comment.find({ hotelId }).lean()
+            const sum = comments.reduce((acc, comment) => {
+                if (comment.rating !== undefined) {
+                    return acc + comment.rating
+                }
+                return acc
+            }, 0)
+            const averageRating = sum / comments.length
             res.status(201).json({
                 message: 'Get data successfully',
-                data: comments,
+                data: {
+                    count: comments.length,
+                    averageRating,
+                    comments,
+                },
             })
         } catch (error) {
             console.error(error)

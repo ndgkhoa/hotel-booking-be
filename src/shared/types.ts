@@ -17,7 +17,7 @@ export type UserType = {
     email: string
     firstName: string
     lastName: string
-    status:boolean
+    status: boolean
 }
 
 export type CategoryType = {
@@ -67,7 +67,7 @@ export type BookingType = {
     checkOut: Date
     adultCount: number
     childCount: number
-    status: boolean
+    status: string
     totalCost: number
     userId: string
     roomId: string
@@ -81,6 +81,8 @@ export type BookingDetailType = {
     roomId: string
     receiptId: string
     bookingId: string
+    createdAt?: Date
+    updatedAt?: Date
 }
 
 export type CouponType = {
@@ -96,5 +98,6 @@ export type CommentType = {
     hotelId: string
     userId: string
     content: string
+    rating: number
     status: boolean
 }

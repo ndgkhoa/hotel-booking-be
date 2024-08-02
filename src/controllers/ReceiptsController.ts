@@ -4,6 +4,7 @@ import Room from '../models/room'
 import BookingDetail from '../models/bookingDetail'
 import Booking from '../models/booking'
 import Stripe from 'stripe'
+import { createVNPayPaymentUrl } from '../utils/vnPayUtils'
 
 const stripe = new Stripe(process.env.STRIPE_API_KEY as string, {
     apiVersion: '2024-04-10',
@@ -29,7 +30,7 @@ const ReceiptsController = {
                 return res.status(404).json({ message: 'Room not found' })
             }
 
-            booking.status = true
+            booking.status = 'paid'
             booking.updatedAt = new Date() as any
             let checkOut: any = booking.checkOut
             if (!(checkOut instanceof Date)) {
@@ -70,6 +71,25 @@ const ReceiptsController = {
                         .status(500)
                         .json({ message: 'Payment processing error', error })
                 }
+            } else if (method === 'vnpay') {
+                try {
+                    const vnpayUrl = createVNPayPaymentUrl(
+                        totalCost,
+                        bookingId,
+                        req,
+                    )
+
+                    res.status(200).json({
+                        message: 'Redirecting to VNPay',
+                        vnpayUrl,
+                    })
+                } catch (error) {
+                    console.error('VNPay Payment Error:', error)
+                    return res
+                        .status(500)
+                        .json({ message: 'Payment processing error', error })
+                }
+                return
             }
 
             const newReceipt = new Receipt({
@@ -95,27 +115,6 @@ const ReceiptsController = {
         } catch (error) {
             console.error('General Error:', error)
             res.status(500).json({ message: 'Something went wrong', error })
-        }
-    },
-
-    getReceiptsByUserId: async (req: Request, res: Response) => {
-        const userId = req.userId
-        try {
-            const receipts = await Receipt.find({ userId }).lean()
-
-            if (receipts.length === 0) {
-                return res
-                    .status(404)
-                    .json({ message: 'No receipts found for this user' })
-            }
-
-            return res.status(200).json({
-                message: 'Get data successfully',
-                data: receipts,
-            })
-        } catch (error) {
-            console.error('Error fetching receipts:', error)
-            throw new Error('Error fetching receipts')
         }
     },
 }
