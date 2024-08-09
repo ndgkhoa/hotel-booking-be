@@ -7,7 +7,7 @@ const commentSchema = new mongoose.Schema(
         hotelId: { type: String, require: true },
         content: { type: String, require: true },
         rating: { type: Number, require: true, min: 1, max: 5 },
-        status: { type: Boolean, require: true, default: false },
+        status: { type: Boolean, require: true, default: true },
     },
     {
         timestamps: true,

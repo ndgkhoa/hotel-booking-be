@@ -102,7 +102,7 @@ const RoomsController = {
             }
 
             const roomsWithFinalPrice = rooms.map((room) => {
-                let discountRate = 0.1
+                let discountRate = 0
                 let finalPrice = room.pricePerNight
 
                 if (maxDiscountPromotion) {
@@ -161,8 +161,25 @@ const RoomsController = {
 
     changeStatus: async (req: Request, res: Response) => {
         const roomId = req.params.roomId
-        const room = await Room.findById({ _id: roomId })
-        if (!room) return res.status(500).json({ message: 'Room not found' })
+        const supplierId = req.userId
+
+        const room = await Room.findById(roomId)
+        if (!room) return res.status(404).json({ message: 'Room not found' })
+
+        const hotel = await Hotel.findById(room.hotelId)
+        if (!hotel) {
+            return res.status(404).json({ message: 'Hotel not found' })
+        }
+
+        if (hotel.supplierId !== supplierId) {
+            return res
+                .status(403)
+                .json({
+                    message:
+                        'Unauthorized: You do not have permission to change this room status',
+                })
+        }
+
         room.status = !room.status
         room.save()
         return res
@@ -178,7 +195,7 @@ const RoomsController = {
 
             const currentTime = new Date()
             for (const room of rooms) {
-                if (room.bookedLatest&&room.status===false) {
+                if (room.bookedLatest && room.status === false) {
                     const bookedLastest = new Date(room.bookedLatest as any)
                     const timeDifference =
                         bookedLastest.getTime() - currentTime.getTime()

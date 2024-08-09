@@ -36,7 +36,7 @@ const CommentsController = {
             if (!hotel) {
                 return res.status(404).json({ message: 'Hotel not found' })
             }
-            const comments = await Comment.find({ hotelId }).lean()
+            const comments = await Comment.find({ hotelId ,status:true}).lean()
             const sum = comments.reduce((acc, comment) => {
                 if (comment.rating !== undefined) {
                     return acc + comment.rating

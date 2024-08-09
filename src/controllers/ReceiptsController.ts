@@ -23,6 +23,11 @@ const ReceiptsController = {
             if (!booking) {
                 return res.status(404).json({ message: 'Booking not found' })
             }
+            if (booking.status === 'paid') {
+                return res
+                    .status(400)
+                    .json({ message: 'Booking has already been paid.' })
+            }
 
             const roomId = booking.roomId
             const room = await Room.findById(roomId)
@@ -74,7 +79,7 @@ const ReceiptsController = {
             } else if (method === 'vnpay') {
                 try {
                     const vnpayUrl = createVNPayPaymentUrl(
-                        totalCost,
+                        totalCost * 100,
                         bookingId,
                         req,
                     )
@@ -115,6 +120,16 @@ const ReceiptsController = {
         } catch (error) {
             console.error('General Error:', error)
             res.status(500).json({ message: 'Something went wrong', error })
+        }
+    },
+
+    vnPayCallback: async (req: Request, res: Response) => {
+        const vnpParams = req.query
+
+        if (vnpParams.vnp_ResponseCode === '00') {
+            return res.status(200).json({ message: 'Payment successful!' })
+        } else {
+            return res.status(400).json({ message: 'Payment failed!' })
         }
     },
 }

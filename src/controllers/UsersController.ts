@@ -93,6 +93,15 @@ const UsersController = {
                 code,
             })
 
+            const currentTime = new Date()
+            const tenMinutesAgo = new Date(
+                currentTime.getTime() - 10 * 60 * 1000,
+            )
+
+            await SupplierConfirmation.deleteMany({
+                createdAt: { $lt: tenMinutesAgo },
+            })
+
             if (!confirmation) {
                 return res
                     .status(400)
@@ -101,8 +110,6 @@ const UsersController = {
 
             const expirationTime = new Date(confirmation.createdAt)
             expirationTime.setMinutes(expirationTime.getMinutes() + 10)
-
-            const currentTime = new Date()
 
             if (expirationTime < currentTime) {
                 await SupplierConfirmation.deleteOne({ userId, code })
