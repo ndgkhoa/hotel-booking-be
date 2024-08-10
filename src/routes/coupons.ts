@@ -7,7 +7,7 @@ const router = express.Router()
 
 router.get('/', verifyToken, isSupplier, CouponsController.getSupplierCoupon)
 router.post('/', verifyToken, isSupplier, CouponsController.createCoupon)
-router.post('/:bookingId/use-coupon', CouponsController.useHotelCoupon)
+router.post('/:bookingId/use-coupon', CouponsController.useCoupon)
 router.put(
     '/:couponId/change-status',
     verifyToken,

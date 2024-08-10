@@ -193,6 +193,11 @@ const BookingsController = {
                     .json({ message: 'Booking is not paid status' })
             }
 
+            const room = await Room.findById(booking.roomId)
+            if (!room) {
+                return res.status(404).json({ message: 'Room not found' })
+            }
+
             let newCoupon
             if (booking.createdAt instanceof Date) {
                 const currentTime = new Date()
@@ -227,9 +232,11 @@ const BookingsController = {
                         .json({ message: 'You can not cancel this booking' })
 
                 booking.status = 'canceled'
+                room.status=true
 
                 await newCoupon.save()
                 await booking.save()
+                await room.save()
             }
 
             res.status(200).json({

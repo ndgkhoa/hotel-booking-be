@@ -57,7 +57,7 @@ const CouponsController = {
         }
     },
 
-    useHotelCoupon: async (req: Request, res: Response) => {
+    useCoupon: async (req: Request, res: Response) => {
         const { coupon, totalCost } = req.body
         const bookingId = req.params.bookingId
 

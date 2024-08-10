@@ -6,16 +6,40 @@ import isSupplier from '../middlewares/isSupplier'
 const router = express.Router()
 
 router.get(
-    '/room-revenue',
+    '/supplier-revenue',
     verifyToken,
     isSupplier,
-    StatisticsController.getRoomRevenueOfSupplier,
+    StatisticsController.getMonthlySupplierRevenue,
 )
 router.get(
     '/hotel-revenue/',
     verifyToken,
     isSupplier,
-    StatisticsController.getHotelRevenue,
+    StatisticsController.getHotelsRevenueBySupplier,
+)
+router.get(
+    '/monthly-hotel-revenue/:hotelId',
+    verifyToken,
+    isSupplier,
+    StatisticsController.getMonthlyHotelRevenue,
+)
+router.get(
+    '/room-revenue',
+    verifyToken,
+    isSupplier,
+    StatisticsController.getRoomsRevenueBySupplier,
+)
+router.get(
+    '/rooms-revenue-hotel/:hotelId',
+    verifyToken,
+    isSupplier,
+    StatisticsController.getRoomsRevenueOfHotelBySupplier,
+)
+router.get(
+    '/daily-room-revenue/:roomId',
+    verifyToken,
+    isSupplier,
+    StatisticsController.getDailyRoomRevenue,
 )
 router.get(
     '/total-cost/:roomId',
@@ -28,12 +52,6 @@ router.get(
     verifyToken,
     isSupplier,
     StatisticsController.getBookingDetailCountByRoom,
-)
-router.get(
-    '/supplier-revenue',
-    verifyToken,
-    isSupplier,
-    StatisticsController.getSuppliersRevenue,
 )
 
 export default router

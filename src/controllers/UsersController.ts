@@ -3,7 +3,6 @@ import Hotel from '../models/hotel'
 import User from '../models/user'
 import _ from 'lodash'
 import { sendConfirmationCode } from '../utils/mailer'
-import SupplierConfirmation from '../models/supplierConfirmation'
 import Account from '../models/account'
 import { generateRandomCode } from '../utils/randomCodeUtils'
 
@@ -66,9 +65,9 @@ const UsersController = {
 
             const confirmationCode = generateRandomCode(8)
 
-            await SupplierConfirmation.create({
-                userId,
-                code: confirmationCode,
+            res.cookie(`confirmation_code_${userId}`, confirmationCode, {
+                httpOnly: true,
+                maxAge: 15 * 60 * 1000,
             })
 
             await sendConfirmationCode(user.email, confirmationCode)
@@ -86,39 +85,16 @@ const UsersController = {
     verifySupplierCode: async (req: Request, res: Response) => {
         const { code } = req.body
         const userId = req.userId
+        const storedCode = req.cookies[`confirmation_code_${userId}`]
 
         try {
-            const confirmation = await SupplierConfirmation.findOne({
-                userId,
-                code,
-            })
-
-            const currentTime = new Date()
-            const tenMinutesAgo = new Date(
-                currentTime.getTime() - 10 * 60 * 1000,
-            )
-
-            await SupplierConfirmation.deleteMany({
-                createdAt: { $lt: tenMinutesAgo },
-            })
-
-            if (!confirmation) {
+            if (storedCode !== code) {
                 return res
                     .status(400)
-                    .json({ message: 'Invalid or expired confirmation code' })
+                    .json({ message: 'Invalid confirmation code' })
             }
 
-            const expirationTime = new Date(confirmation.createdAt)
-            expirationTime.setMinutes(expirationTime.getMinutes() + 10)
-
-            if (expirationTime < currentTime) {
-                await SupplierConfirmation.deleteOne({ userId, code })
-                return res
-                    .status(400)
-                    .json({ message: 'The confirmation code has expired.' })
-            }
-
-            await SupplierConfirmation.deleteOne({ userId, code })
+            res.clearCookie(`confirmation_code_${userId}`)
 
             const updatedUser = await User.findByIdAndUpdate(
                 userId,
