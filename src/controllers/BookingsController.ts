@@ -151,7 +151,7 @@ const BookingsController = {
         }
     },
 
-    cancelPendingBooking: async (req: Request, res: Response) => {
+    cancelBooking: async (req: Request, res: Response) => {
         const bookingId = req.params.bookingId
         try {
             const booking = await Booking.findById(bookingId)
@@ -160,92 +160,78 @@ const BookingsController = {
                 return res.status(404).json({ message: 'Booking not found' })
             }
 
-            if (booking.status !== 'pending') {
-                return res
-                    .status(400)
-                    .json({ message: 'Booking is not pending status' })
-            }
-            booking.status = 'canceled'
-
-            await booking.save()
-            res.status(200).json({
-                message: 'Booking canceled successfully',
-                data: booking,
-            })
-        } catch (error) {
-            console.error(error)
-            res.status(500).json({ message: 'Something went wrong' })
-        }
-    },
-
-    cancelPaidBooking: async (req: Request, res: Response) => {
-        const bookingId = req.params.bookingId
-        try {
-            const booking = await Booking.findById(bookingId)
-
-            if (!booking) {
-                return res.status(404).json({ message: 'Booking not found' })
-            }
-
-            if (booking.status !== 'paid') {
-                return res
-                    .status(400)
-                    .json({ message: 'Booking is not paid status' })
-            }
-
-            const room = await Room.findById(booking.roomId)
-            if (!room) {
-                return res.status(404).json({ message: 'Room not found' })
-            }
-
-            let newCoupon
-            if (booking.createdAt instanceof Date) {
-                const currentTime = new Date()
-                const expirationDate = new Date(currentTime)
-                expirationDate.setMonth(currentTime.getMonth() + 1)
-                const timeDifference =
-                    currentTime.getTime() - booking.createdAt.getTime()
-                const hoursDifference = Math.ceil(
-                    timeDifference / (1000 * 60 * 60),
-                )
-                const randomCode = generateRandomCode(6)
-
-                if (hoursDifference >= 48) {
-                    newCoupon = new Coupon({
-                        supplierId: 'admin',
-                        code: randomCode,
-                        type: 'percentage',
-                        value: 85,
-                        expirationDate: expirationDate,
-                    })
-                } else if (hoursDifference >= 24) {
-                    newCoupon = new Coupon({
-                        supplierId: 'admin',
-                        code: randomCode,
-                        type: 'percentage',
-                        value: 50,
-                        expirationDate: expirationDate,
-                    })
-                } else
-                    return res
-                        .status(400)
-                        .json({ message: 'You can not cancel this booking' })
-
+            if (booking.status === 'pending') {
                 booking.status = 'canceled'
-                room.status=true
 
-                await newCoupon.save()
                 await booking.save()
-                await room.save()
-            }
+                return res.status(200).json({
+                    message: 'Booking canceled successfully',
+                    data: booking,
+                })
+            } else if (booking.status === 'paid') {
+                const room = await Room.findById(booking.roomId)
+                if (!room) {
+                    return res.status(404).json({ message: 'Room not found' })
+                }
 
-            res.status(200).json({
-                message: 'Booking canceled successfully',
-                data: {
-                    booking,
-                    newCoupon,
-                },
-            })
+                let newCoupon
+                if (booking.createdAt instanceof Date) {
+                    const currentTime = new Date()
+
+                    const expirationDate = new Date(currentTime)
+                    expirationDate.setMonth(currentTime.getMonth() + 1)
+
+                    const timeDifference =
+                        (booking.checkOut as unknown as Date).getTime() -
+                        currentTime.getTime()
+
+                    const hoursDifference = Math.ceil(
+                        timeDifference / (1000 * 60 * 60),
+                    )
+
+                    const randomCode = generateRandomCode(6)
+
+                    if (hoursDifference >= 48) {
+                        newCoupon = new Coupon({
+                            supplierId: 'admin',
+                            code: randomCode,
+                            type: 'percentage',
+                            value: 85,
+                            expirationDate: expirationDate,
+                        })
+                    } else if (hoursDifference >= 24) {
+                        newCoupon = new Coupon({
+                            supplierId: 'admin',
+                            code: randomCode,
+                            type: 'percentage',
+                            value: 50,
+                            expirationDate: expirationDate,
+                        })
+                    } else
+                        return res.status(400).json({
+                            message: 'You can not cancel this booking',
+                        })
+
+                    booking.status = 'canceled'
+                    room.status = true
+
+                    await newCoupon.save()
+                    await booking.save()
+                    await room.save()
+                }
+
+                res.status(200).json({
+                    message: 'Booking canceled successfully',
+                    data: {
+                        booking,
+                        newCoupon,
+                    },
+                })
+            } else {
+                return res.status(400).json({
+                    message: 'Canceled booking status',
+                })
+            }
         } catch (error) {
             console.error(error)
             res.status(500).json({ message: 'Something went wrong' })
