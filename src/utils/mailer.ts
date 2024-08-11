@@ -9,12 +9,13 @@ const transporter = nodemailer.createTransport({
 })
 
 interface BookingInfo {
+    id: string
     checkIn: string
     checkOut: string
     adultCount: number
     childCount: number
     totalCost: number
-    bookingDate?: Date
+    bookingDate: Date
     userName: string
 }
 
@@ -37,6 +38,7 @@ const sendBookingConfirmation = (to: string, bookingInfo: BookingInfo) => {
                 <p>Dear ${bookingInfo.userName},</p>
                 <p>Your booking is confirmed. Here are the details:</p>
                 <ul style="list-style-type: none; padding: 0;">
+                    <li><strong>ID:</strong> ${bookingInfo.id}</li>
                     <li><strong>Check-in:</strong> ${bookingInfo.checkIn}</li>
                     <li><strong>Check-out:</strong> ${bookingInfo.checkOut}</li>
                     <li><strong>Number of adults:</strong> ${bookingInfo.adultCount}</li>
@@ -76,4 +78,37 @@ const sendConfirmationCode = (
     return transporter.sendMail(mailOptions)
 }
 
-export { sendBookingConfirmation, BookingInfo, sendConfirmationCode }
+const sendCancellationEmail = (email: string, data: any) => {
+    const { booking, newCoupon } = data
+    let couponDetails = ''
+
+    if (newCoupon) {
+        couponDetails = `
+            <p>We have issued a coupon for you:</p>
+            <p>Code: ${newCoupon.code}</p>
+            <p>Discount: ${newCoupon.value}%</p>
+            <p>Expires on: ${newCoupon.expirationDate.toDateString()}</p>
+        `
+    }
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Booking Cancellation Confirmation',
+        html: `
+            <h1>Booking Cancellation</h1>
+            <p>Your booking with ID ${booking._id} has been canceled.</p>
+            ${couponDetails}
+            <p>If you have any questions, please contact us.</p>
+        `,
+    }
+
+    return transporter.sendMail(mailOptions)
+}
+
+export {
+    sendBookingConfirmation,
+    BookingInfo,
+    sendConfirmationCode,
+    sendCancellationEmail,
+}

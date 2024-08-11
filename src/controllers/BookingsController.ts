@@ -3,9 +3,10 @@ import Booking from '../models/booking'
 import Hotel from '../models/hotel'
 import Room from '../models/room'
 import User from '../models/user'
-import { sendBookingConfirmation } from '../utils/mailer'
+import { sendBookingConfirmation, sendCancellationEmail } from '../utils/mailer'
 import Coupon from '../models/coupon'
 import { generateRandomCode } from '../utils/randomCodeUtils'
+import mongoose from 'mongoose'
 
 const BookingsController = {
     booking: async (req: Request, res: Response) => {
@@ -56,11 +57,13 @@ const BookingsController = {
                 userId,
                 roomId,
             })
+            const id = newBooking.id
             await newBooking.save()
 
             const user = await User.findById(userId)
             if (user) {
                 await sendBookingConfirmation(user.email, {
+                    id,
                     checkIn,
                     checkOut,
                     adultCount,
@@ -78,7 +81,104 @@ const BookingsController = {
         }
     },
 
-    bookingWithoutLogin: async (req: Request, res: Response) => {},
+    bookingWithoutLogin: async (req: Request, res: Response) => {
+        const {
+            checkIn,
+            checkOut,
+            adultCount,
+            childCount,
+            email,
+            phoneNumber,
+        } = req.body
+
+        const roomId = req.params.roomId
+
+        if (
+            !checkIn ||
+            !checkOut ||
+            adultCount === undefined ||
+            childCount === undefined ||
+            !roomId ||
+            !email ||
+            !phoneNumber
+        ) {
+            return res.status(400).json({ message: 'Missing required fields' })
+        }
+
+        try {
+            const room = await Room.findById(roomId)
+            if (!room) {
+                return res.status(400).json({ message: 'Room not found' })
+            }
+
+            const checkInDate = new Date(checkIn)
+            const checkOutDate = new Date(checkOut)
+            const timeDifference =
+                checkOutDate.getTime() - checkInDate.getTime()
+            const numberOfNights = timeDifference / (1000 * 3600 * 24)
+
+            if (numberOfNights <= 0) {
+                return res
+                    .status(400)
+                    .json({ message: 'Invalid check-in or check-out dates' })
+            }
+
+            const totalCost = parseFloat(
+                (room.pricePerNight * numberOfNights).toFixed(2),
+            )
+
+            const newBooking = new Booking({
+                checkIn,
+                checkOut,
+                adultCount,
+                childCount,
+                totalCost,
+                roomId,
+                email,
+                phoneNumber,
+            })
+            const id = newBooking.id
+            await newBooking.save()
+
+            await sendBookingConfirmation(email, {
+                id,
+                checkIn,
+                checkOut,
+                adultCount,
+                childCount,
+                totalCost,
+                bookingDate: newBooking.createdAt as unknown as Date,
+                userName: 'Guest',
+            })
+
+            res.status(201).send(newBooking)
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
+
+    searchBookingById: async (req: Request, res: Response) => {
+        const { bookingId } = req.body
+
+        if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+            return res.status(400).json({ message: 'Invalid booking ID' })
+        }
+
+        try {
+            const booking = await Booking.findById(bookingId)
+
+            if (!booking) {
+                return res.status(404).json({ message: 'Booking not found' })
+            }
+            return res
+                .status(200)
+                .json({ message: 'Get data successfully', data: booking })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ message: 'Something went wrong' })
+        }
+    },
 
     getBooking: async (req: Request, res: Response) => {
         const bookingId = req.params.bookingId
@@ -164,6 +264,15 @@ const BookingsController = {
                 booking.status = 'canceled'
 
                 await booking.save()
+
+                const user = await User.findById(booking.userId)
+                if (user) {
+                    await sendCancellationEmail(user.email, {
+                        booking,
+                        newCoupon: null,
+                    })
+                }
+
                 return res.status(200).json({
                     message: 'Booking canceled successfully',
                     data: booking,
@@ -182,7 +291,7 @@ const BookingsController = {
                     expirationDate.setMonth(currentTime.getMonth() + 1)
 
                     const timeDifference =
-                        (booking.checkOut as unknown as Date).getTime() -
+                        (booking.checkIn as unknown as Date).getTime() -
                         currentTime.getTime()
 
                     const hoursDifference = Math.ceil(
@@ -220,6 +329,14 @@ const BookingsController = {
                     await room.save()
                 }
 
+                const user = await User.findById(booking.userId)
+                if (user) {
+                    await sendCancellationEmail(user.email, {
+                        booking,
+                        newCoupon,
+                    })
+                }
+
                 res.status(200).json({
                     message: 'Booking canceled successfully',
                     data: {
@@ -250,11 +367,11 @@ const BookingsController = {
             const updatePromises = bookings.map(async (booking) => {
                 if (
                     booking.status === 'pending' &&
-                    booking.createdAt instanceof Date
+                    booking.checkIn instanceof Date
                 ) {
                     const nowDate = new Date()
                     const timeDifference =
-                        nowDate.getTime() - booking.createdAt.getTime()
+                        nowDate.getTime() - booking.checkIn.getTime()
                     const numberOfDays = timeDifference / (1000 * 3600 * 24)
 
                     if (numberOfDays >= 3) {

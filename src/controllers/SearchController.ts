@@ -5,9 +5,7 @@ import Room from '../models/room'
 const search = async (req: Request, res: Response) => {
     try {
         const {
-            hotelName,
-            city,
-            country,
+            destination,
             minStarRating,
             maxPrice,
             adultCount,
@@ -22,19 +20,21 @@ const search = async (req: Request, res: Response) => {
         const hotelQuery: any = {}
         const roomQuery: any = {}
 
-        if (hotelName) {
-            hotelQuery.name = { $regex: hotelName, $options: 'i' }
-        }
-        if (city || country) {
+        if (destination) {
             const destinationQuery: any[] = []
-            if (city) {
-                destinationQuery.push({ city: { $regex: city, $options: 'i' } })
-            }
-            if (country) {
-                destinationQuery.push({
-                    country: { $regex: country, $options: 'i' },
-                })
-            }
+
+            destinationQuery.push({
+                name: { $regex: destination, $options: 'i' },
+            })
+
+            destinationQuery.push({
+                country: { $regex: destination, $options: 'i' },
+            })
+
+            destinationQuery.push({
+                city: { $regex: destination, $options: 'i' },
+            })
+
             hotelQuery.$or = destinationQuery
         }
         if (minStarRating) {

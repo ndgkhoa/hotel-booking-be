@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import Comment from '../models/comment'
 import Hotel from '../models/hotel'
+import mongoose from 'mongoose'
+import User from '../models/user'
 
 const CommentsController = {
     createComment: async (req: Request, res: Response) => {
@@ -12,7 +14,16 @@ const CommentsController = {
                 .status(400)
                 .json({ message: 'Content and rating are required' })
         }
+
+        if (!mongoose.Types.ObjectId.isValid(hotelId)) {
+            return res.status(400).json({ message: 'Invalid booking ID' })
+        }
+
         try {
+            const hotel = await Hotel.findById(hotelId).lean()
+            if (!hotel) {
+                return res.status(404).json({ message: 'Hotel not found' })
+            }
             const newComment = new Comment({
                 userId,
                 hotelId,
@@ -36,7 +47,24 @@ const CommentsController = {
             if (!hotel) {
                 return res.status(404).json({ message: 'Hotel not found' })
             }
-            const comments = await Comment.find({ hotelId ,status:true}).lean()
+            const comments = await Comment.find({
+                hotelId,
+                status: true,
+            }).lean()
+            
+            const getUserById = async (userId:string) => {
+               const user= await User.findById(userId).lean()
+               return user ? `${user.firstName} ${user.lastName}` : 'Unknown User';
+            };
+
+            const commentsWithUsers = await Promise.all(comments.map(async (comment) => {
+                const user = await getUserById(comment.userId);
+                return {
+                    ...comment,
+                    user
+                };
+            }));
+
             const sum = comments.reduce((acc, comment) => {
                 if (comment.rating !== undefined) {
                     return acc + comment.rating
@@ -44,12 +72,12 @@ const CommentsController = {
                 return acc
             }, 0)
             const averageRating = sum / comments.length
-            res.status(201).json({
+            res.status(200).json({
                 message: 'Get data successfully',
                 data: {
                     count: comments.length,
                     averageRating,
-                    comments,
+                    comments: commentsWithUsers,
                 },
             })
         } catch (error) {
